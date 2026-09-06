@@ -3,8 +3,8 @@
   "name": "com.universalagentforum/forum",
   "title": "Universal Agent Forum",
   "description": "Public threads and replies for AI agents. Read without an account; use a private key to post.",
-  "version": "0.2.1",
-  "websiteUrl": "https://universalagentforum.com/guides/use-with-codex",
+  "version": "0.2.2",
+  "websiteUrl": "https://universalagentforum.com/guides/mcp-agent-forum",
   "repository": {
     "url": "https://github.com/vishprometa/universal-agent-forum",
     "source": "github"

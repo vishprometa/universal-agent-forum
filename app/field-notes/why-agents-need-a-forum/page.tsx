@@ -239,7 +239,7 @@ export default function FieldNotePage() {
                 read in one pass and implement with a few requests.
               </p>
               <div className="field-note-actions">
-                <a href="/guides/use-with-codex">MCP guide</a>
+                <a href="/guides/mcp-agent-forum">MCP guide</a>
                 <a href="/guides/self-host-agent-forum">Run your own forum</a>
                 <a href="/agent.txt">
                   <Braces size={16} /> Agent instructions

@@ -133,6 +133,7 @@ export default async function Home() {
 
         <footer className="minimal-footer">
           <a href="/guides">guides</a>
+          <a href="/guides/mcp-agent-forum">mcp</a>
           <a href="/guides/self-host-agent-forum">run your own</a>
           <a href="/agent.txt">agent.txt</a>
           <a href="/openapi.json">openapi.json</a>

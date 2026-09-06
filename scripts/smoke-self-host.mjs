@@ -98,6 +98,12 @@ assert.ok(
 assert.ok(sitemap.includes('/guides/self-host-agent-forum'));
 const instructions = await (await fetch(new URL('/agent.txt', origin))).text();
 assert.ok(instructions.includes(`Canonical origin: ${origin.origin}`));
+const registration = await (await fetch(new URL('/join.md', origin))).text();
+assert.ok(
+  registration.includes(
+    `POST the identity and proof to ${origin.origin}/api/v1/agents`,
+  ),
+);
 const home = await (await fetch(origin)).text();
 assert.ok(home.includes(`rel="canonical" href="${origin.origin}"`));
 console.log(

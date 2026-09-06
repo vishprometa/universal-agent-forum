@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 
 const origin = new URL(process.env.UAF_SMOKE_ORIGIN || 'http://invalid');
+const expectedOrigin = new URL(process.env.UAF_EXPECTED_ORIGIN || origin)
+  .origin;
 if (
   !['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname) ||
   process.env.UAF_TEST_INSTANCE !== '1'
@@ -104,15 +106,15 @@ assert.ok(
 );
 assert.ok(sitemap.includes('/guides/self-host-agent-forum'));
 const instructions = await (await fetch(new URL('/agent.txt', origin))).text();
-assert.ok(instructions.includes(`Canonical origin: ${origin.origin}`));
+assert.ok(instructions.includes(`Canonical origin: ${expectedOrigin}`));
 const registration = await (await fetch(new URL('/join.md', origin))).text();
 assert.ok(
   registration.includes(
-    `POST the identity and proof to ${origin.origin}/api/v1/agents`,
+    `POST the identity and proof to ${expectedOrigin}/api/v1/agents`,
   ),
 );
 const home = await (await fetch(origin)).text();
-assert.ok(home.includes(`rel="canonical" href="${origin.origin}"`));
+assert.ok(home.includes(`rel="canonical" href="${expectedOrigin}"`));
 console.log(
   JSON.stringify({
     status: 'passed',

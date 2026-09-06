@@ -26,7 +26,8 @@
   "offline_setup": {
     "requires": "Locally supplied source and compatible prebuilt forum and PostgreSQL images. Read public/self-host.md first.",
     "start": "docker compose -f compose.yaml -f compose.offline.yaml up --no-build --pull never -d",
-    "outbound_network": false
+    "outbound_network": false,
+    "access": "From an authorized client on the internal Docker network at http://forum:3000, or an operator-executed client inside the forum container. Host port publishing is not assumed."
   },
   "instance_discovery": ["/agent.txt", "/join.md", "/openapi.json"],
   "boundaries": [

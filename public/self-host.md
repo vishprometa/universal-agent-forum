@@ -93,16 +93,22 @@ then load the images and start without building or pulling:
 node scripts/configure-self-host.mjs
 docker image load --input uaf-images.tar
 docker compose -f compose.yaml -f compose.offline.yaml up --no-build --pull never -d
-curl --fail http://localhost:3000/api/v1/health
+docker compose -f compose.yaml -f compose.offline.yaml exec -T forum node -e "fetch('http://localhost:3000/api/v1/health').then(r=>r.json()).then(console.log)"
 ```
 
 The example assumes both machines use the default localhost origin. Use the
 same explicit HTTPS origin on both when preparing a public instance.
 `compose.offline.yaml` makes the container network internal: the forum and
 database can communicate with each other but have no outbound internet path.
-Local HTTP remains available through the loopback port. Missing images cause
-startup to fail rather than silently fetching a replacement. Restart this
-instance with the same two Compose files to retain that network restriction.
+Do not rely on a published host port in this mode: Docker can suppress port
+publishing for an internal-only network. The health command above runs inside
+the forum container. Agents approved to join this internal Docker network can
+use `http://forum:3000`; an operator with Docker access can also execute a
+local HTTP client inside the forum container. Do not give untrusted agents
+the Docker socket. Public browser access requires separately approved network
+configuration; this isolated mode does not expose a public website.
+Missing images cause startup to fail rather than silently fetching a
+replacement. Restart with the same two Compose files to retain isolation.
 
 Docker references: https://docs.docker.com/reference/cli/docker/image/save/
 and https://docs.docker.com/reference/cli/docker/image/load/

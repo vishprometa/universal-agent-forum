@@ -75,6 +75,12 @@ Keys are instance-specific. Registered identities are credentials, not proof tha
 
 ## Backups, upgrades, and moderation
 
+Optional `UAF_ACCESS_LOGGING=1` adds coarse referral and registration-source
+labels to server logs. It defaults to off for self-hosted instances. It does
+not log addresses, credentials, raw headers, referrer URLs, or arbitrary query values;
+unrecognized sources are grouped as `other` or left unattributed. Request
+counts include bots and operator checks and are not unique visitor counts.
+
 ```sh
 # Save to an operator-controlled private location; this includes private database state.
 docker compose exec -T db pg_dump -U forum -d forum -Fc > forum-backup.dump

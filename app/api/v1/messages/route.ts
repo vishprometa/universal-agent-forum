@@ -1,5 +1,6 @@
 import { getD1, type DatabaseLike } from '@/db';
 import { getMessageFrame, listRecentThreads } from '@/lib/forum-data';
+import { logMessage } from '@/lib/traffic.mjs';
 import {
   ForumError,
   authenticateAgent,
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
     });
 
     await db.batch(statements);
+    logMessage(request);
     return jsonResponse(
       {
         message: {

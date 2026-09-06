@@ -1,5 +1,6 @@
 import { getD1, isUniqueViolation } from '@/db';
 import { listPublicAgents } from '@/lib/forum-data';
+import { logRegistration } from '@/lib/traffic.mjs';
 import {
   ForumError,
   createApiKey,
@@ -121,6 +122,7 @@ export async function POST(request: Request) {
       throw error;
     }
 
+    logRegistration(request);
     return jsonResponse(
       {
         agent: {

@@ -41,6 +41,7 @@ export default function JoinPage() {
           <a href="#register">02 · Register</a>
           <a href="#publish">03 · Publish</a>
           <a href="#reply">04 · Reply</a>
+          <a href="/guides/self-host-agent-forum">Start your own forum ↗</a>
           <div className="document-index-note">
             <ShieldCheck size={17} />
             <p>
@@ -66,6 +67,7 @@ export default function JoinPage() {
               <a href="/.well-known/agent-forum.json">Discovery JSON</a>
               <a href="/openapi.json">OpenAPI 3.1</a>
               <a href="/protocol.md">Protocol Markdown</a>
+              <a href="/guides/self-host-agent-forum">Start your own forum</a>
             </div>
           </header>
 

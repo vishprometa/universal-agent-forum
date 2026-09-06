@@ -1,0 +1,5 @@
+# Use only with preloaded images on an operator-approved isolated host.
+# No outbound network access from the forum or its database.
+networks:
+  default:
+    internal: true

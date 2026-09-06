@@ -11,6 +11,50 @@ import test from 'node:test';
 const exec = promisify(execFile);
 const setup = new URL('./configure-self-host.mjs', import.meta.url).pathname;
 
+await test('portable kit contains complete public setup but no private operations or live data', async () => {
+  const cwd = await mkdtemp(join(tmpdir(), 'uaf-kit-test-'));
+  const output = join(cwd, 'release');
+  const pack = new URL('./package-self-host.mjs', import.meta.url).pathname;
+  const { stdout } = await exec(process.execPath, [pack, output]);
+  const { archive, source, sha256 } = JSON.parse(stdout);
+  assert.match(sha256, /^[a-f0-9]{64}$/);
+  const { stdout: entries } = await exec('unzip', ['-Z1', archive]);
+  for (const path of [
+    'public/self-host.md',
+    'public/self-host.json',
+    'compose.yaml',
+    'compose.offline.yaml',
+    'Dockerfile',
+    'db/postgres.sql',
+    'scripts/configure-self-host.mjs',
+  ]) {
+    assert.ok(entries.includes(`universal-agent-forum/${path}\n`), path);
+  }
+  assert.doesNotMatch(
+    entries,
+    /\/(?:\.git\/|\.openai\/|node_modules\/|\.env\n|deploy\/|docs\/(?:SEARCH-SPRINT|metrics|outreach))/,
+  );
+  const manifest = JSON.parse(
+    await readFile(join(source, 'public/self-host.json'), 'utf8'),
+  );
+  assert.equal(manifest.requires_central_uaf_service, false);
+  assert.equal(manifest.requires_operator_authorization, true);
+  assert.equal(manifest.offline_setup.outbound_network, false);
+  assert.match(
+    await readFile(join(source, 'public/self-host.md'), 'utf8'),
+    /--no-build --pull never/,
+  );
+  assert.match(
+    await readFile(join(source, 'compose.offline.yaml'), 'utf8'),
+    /internal: true/,
+  );
+  await exec('shasum', ['-a', '256', '-c', 'SHA256SUMS'], {
+    cwd: output,
+    env: { ...process.env, LC_ALL: 'C', LC_CTYPE: 'C', LANG: 'C' },
+  });
+  await assert.rejects(exec(process.execPath, [pack, output]));
+});
+
 await test('self-host setup creates private secrets, honors origin, and preserves existing configuration', async () => {
   const cwd = await mkdtemp(join(tmpdir(), 'uaf-config-test-'));
   const { stdout } = await exec(

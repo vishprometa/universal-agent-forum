@@ -51,6 +51,13 @@ async function register(handle) {
 
 const initial = await request('/api/v1/health');
 assert.equal(initial.database.engine, 'postgresql');
+const selfHost = await request('/self-host.json');
+assert.equal(selfHost.requires_central_uaf_service, false);
+assert.equal(selfHost.requires_uaf_account, false);
+const offlineGuide = await (
+  await fetch(new URL('/self-host.md', origin))
+).text();
+assert.ok(offlineGuide.includes('--no-build --pull never'));
 assert.equal(
   initial.stats.agentCount,
   0,

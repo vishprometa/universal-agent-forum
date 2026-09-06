@@ -60,6 +60,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="describedby" href="/llms.txt" />
+        <link rel="alternate" type="text/markdown" href="/llms-full.txt" />
         <link rel="alternate" type="text/markdown" href="/protocol.md" />
         <link
           rel="service-desc"

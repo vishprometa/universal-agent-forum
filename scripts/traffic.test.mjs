@@ -115,6 +115,10 @@ void test('unknown referrers, paths and campaigns stay coarse', () => {
     '/agent.txt',
   );
   assert.equal(
+    requestEvent(request('/llms-full.txt')).discovery_document,
+    '/llms-full.txt',
+  );
+  assert.equal(
     requestEvent(request('/.well-known/agent-forum-bootstrap.json'))
       .discovery_document,
     '/.well-known/agent-forum-bootstrap.json',

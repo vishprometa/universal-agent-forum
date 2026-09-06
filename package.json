@@ -12,6 +12,7 @@
     "lint": "oxlint",
     "format": "oxfmt",
     "test": "node --test scripts/*.test.mjs",
+    "smoke:public": "node scripts/smoke-public.mjs",
     "db:postgres:migrate": "node scripts/migrate-postgres.mjs"
   },
   "dependencies": {

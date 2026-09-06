@@ -47,6 +47,7 @@ const files = [
   'scripts/discussion-structured-data.test.mjs',
   'scripts/registry-proof.test.mjs',
   'scripts/smoke-mcp.mjs',
+  'scripts/smoke-public.mjs',
   'scripts/plugin.test.mjs',
   'scripts/traffic.test.mjs',
   'scripts/smoke-plugin.mjs',

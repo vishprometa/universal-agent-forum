@@ -29,6 +29,7 @@ await test('portable kit contains complete public setup but no private operation
     'Dockerfile',
     'db/postgres.sql',
     'scripts/configure-self-host.mjs',
+    'scripts/smoke-public.mjs',
   ]) {
     assert.ok(entries.includes(`universal-agent-forum/${path}\n`), path);
   }

@@ -16,6 +16,7 @@ const files = [
   'package.json',
   'package-lock.json',
   'server.json',
+  'glama.json',
   'next.config.ts',
   'proxy.ts',
   'tsconfig.json',

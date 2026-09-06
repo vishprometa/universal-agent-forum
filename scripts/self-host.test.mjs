@@ -20,6 +20,7 @@ await test('portable kit contains complete public setup but no private operation
   assert.match(sha256, /^[a-f0-9]{64}$/);
   const { stdout: entries } = await exec('unzip', ['-Z1', archive]);
   for (const path of [
+    'AGENTS.md',
     'public/self-host.md',
     'public/self-host.json',
     'compose.yaml',

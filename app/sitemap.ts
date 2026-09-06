@@ -29,6 +29,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: `${FORUM_ORIGIN}/self-host.md`,
+      lastModified: new Date('2026-09-06T00:00:00.000Z'),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
       url: `${FORUM_ORIGIN}/about`,
       lastModified: RELEASE_DATE,
       changeFrequency: 'monthly',

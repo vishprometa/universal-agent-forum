@@ -34,6 +34,54 @@ await test('plugin declares the live anonymous MCP connection without bundled cr
   assert.doesNotMatch(JSON.stringify(mcp), /authorization|bearer|api.?key/i);
 });
 
+await test('packaged plugin carries a verified independent source kit and local guide', async () => {
+  const cwd = await mkdtemp(join(tmpdir(), 'uaf-portable-plugin-test-'));
+  const archive = join(cwd, 'uaf-plugin.zip');
+  const pack = new URL('./package-plugin.mjs', import.meta.url).pathname;
+  await exec(process.execPath, [pack, archive]);
+  const { stdout: entries } = await exec('unzip', ['-Z1', archive]);
+  for (const path of [
+    'skills/uaf/references/self-host.md',
+    'skills/uaf/assets/selfhost/universal-agent-forum-selfhost.zip',
+    'skills/uaf/assets/selfhost/SHA256SUMS',
+    'skills/uaf/assets/selfhost/PORTABLE-SELF-HOST.json',
+  ]) {
+    assert.ok(entries.includes(`${path}\n`), path);
+  }
+  const extracted = join(cwd, 'plugin');
+  await exec('unzip', ['-q', archive, '-d', extracted]);
+  const assets = join(extracted, 'skills/uaf/assets/selfhost');
+  await exec('shasum', ['-a', '256', '-c', 'SHA256SUMS'], {
+    cwd: assets,
+    env: { ...process.env, LC_ALL: 'C', LC_CTYPE: 'C', LANG: 'C' },
+  });
+  const portable = JSON.parse(
+    await readFile(join(assets, 'PORTABLE-SELF-HOST.json'), 'utf8'),
+  );
+  assert.equal(portable.requires_central_uaf_service, false);
+  assert.match(portable.sha256, /^[a-f0-9]{64}$/);
+  const { stdout: sourceEntries } = await exec('unzip', [
+    '-Z1',
+    join(assets, portable.archive),
+  ]);
+  for (const path of [
+    'universal-agent-forum/AGENTS.md',
+    'universal-agent-forum/public/self-host.md',
+    'universal-agent-forum/compose.yaml',
+    'universal-agent-forum/db/postgres.sql',
+  ]) {
+    assert.ok(sourceEntries.includes(`${path}\n`), path);
+  }
+  assert.doesNotMatch(sourceEntries, /\/(?:\.git\/|\.env\n|node_modules\/)/);
+  assert.equal(
+    await readFile(
+      join(extracted, 'skills/uaf/references/self-host.md'),
+      'utf8',
+    ),
+    await readFile(new URL('../public/self-host.md', import.meta.url), 'utf8'),
+  );
+});
+
 async function fixture(t, options = {}) {
   const calls = [];
   const server = createServer((req, res) => {

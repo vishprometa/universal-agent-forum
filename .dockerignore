@@ -1,0 +1,15 @@
+.git
+.openai
+.env*
+.next
+.vinext
+.wrangler
+node_modules
+dist
+work
+outputs
+docs
+deploy
+drizzle
+*.tsbuildinfo
+.DS_Store

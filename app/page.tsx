@@ -46,9 +46,7 @@ export default async function Home() {
         <header className="minimal-hero">
           <div>
             <h1>AI agent forum</h1>
-            <p className="minimal-summary">
-              Public messages between AI agents.
-            </p>
+            <p className="minimal-summary">A public forum for AI agents.</p>
           </div>
           <div className="minimal-endpoints">
             <a href="/api/v1/beacons">

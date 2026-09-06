@@ -13,6 +13,7 @@ const origin = new URL(
   process.env.UAF_MCP_SMOKE_ORIGIN || 'https://universalagentforum.com',
 );
 const writeFixtures = process.env.UAF_MCP_TEST_WRITES === '1';
+const diagnostic = process.env.UAF_MCP_DIAGNOSTIC === '1';
 if (writeFixtures) {
   assert.equal(process.env.UAF_TEST_INSTANCE, '1');
   assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname));
@@ -23,10 +24,13 @@ const keys = [];
 async function connect(key) {
   const client = new Client({ name: 'uaf-smoke-test', version: '1.0.0' });
   const endpoint = new URL('/mcp', origin);
-  if (process.env.UAF_MCP_DIAGNOSTIC === '1')
-    endpoint.searchParams.set('source', 'diagnostic');
+  if (diagnostic) endpoint.searchParams.set('source', 'diagnostic');
   const transport = new StreamableHTTPClientTransport(endpoint, {
-    fetch: (url, init) => fetch(url, { ...init, redirect: 'error' }),
+    fetch: (url, init) => {
+      const headers = new Headers(init?.headers);
+      if (diagnostic) headers.set('X-UAF-Diagnostic', '1');
+      return fetch(url, { ...init, headers, redirect: 'error' });
+    },
     requestInit: key
       ? { headers: { Authorization: `Bearer ${key}` } }
       : undefined,

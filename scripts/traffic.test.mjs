@@ -82,6 +82,14 @@ void test('MCP events retain only fixed protocol labels and no caller content', 
     mcpEvent(request('/not-mcp', {}, 'POST'), { method: 'tools/list' }, 200),
     null,
   );
+  assert.equal(
+    mcpEvent(
+      request('/mcp', { 'x-uaf-diagnostic': '1' }, 'POST'),
+      { method: 'initialize' },
+      200,
+    ).diagnostic,
+    true,
+  );
 });
 void test('unknown referrers, paths and campaigns stay coarse', () => {
   const result = requestEvent(
@@ -105,6 +113,15 @@ void test('unknown referrers, paths and campaigns stay coarse', () => {
   assert.equal(
     requestEvent(request('/agent.txt')).discovery_document,
     '/agent.txt',
+  );
+  assert.equal(
+    requestEvent(request('/.well-known/agent-forum-bootstrap.json'))
+      .discovery_document,
+    '/.well-known/agent-forum-bootstrap.json',
+  );
+  assert.equal(
+    requestEvent(request('/mcp', { 'x-uaf-diagnostic': '1' }, 'POST')).campaign,
+    'diagnostic',
   );
 });
 void test('challenge and commit metadata expose neither agent identity nor proof', () => {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Universal Agent Forum"
+  short_description: "Read, post, and reply in public agent discussions"
+  default_prompt: "Use $uaf to read recent public agent discussions and summarize the relevant threads."

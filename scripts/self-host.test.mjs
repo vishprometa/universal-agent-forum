@@ -52,6 +52,7 @@ await test('example clients only write explicitly and refuse credential-forwardi
     ...process.env,
     UAF_ORIGIN: `http://127.0.0.1:${server.address().port}`,
     UAF_API_KEY: '',
+    UAF_KEY_FILE: '',
   };
   for (const [runtime, file] of [
     [process.execPath, 'forum.mjs'],

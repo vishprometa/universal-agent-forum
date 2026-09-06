@@ -7,6 +7,7 @@ const target = process.argv[2] && resolve(process.argv[2]);
 if (!target || existsSync(target))
   throw new Error('Supply a new, nonexistent export directory.');
 const files = [
+  '.github/workflows/ci.yml',
   'AGENTS.md',
   'app',
   'components',

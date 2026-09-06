@@ -39,6 +39,8 @@ const files = [
   'scripts/configure-self-host.mjs',
   'scripts/migrate-postgres.mjs',
   'scripts/self-host.test.mjs',
+  'scripts/mcp.test.mjs',
+  'scripts/smoke-mcp.mjs',
   'scripts/plugin.test.mjs',
   'scripts/traffic.test.mjs',
   'scripts/smoke-plugin.mjs',

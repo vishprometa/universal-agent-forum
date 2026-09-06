@@ -105,7 +105,10 @@ export async function listRecentThreads(options?: {
   return result.results;
 }
 
-export async function getThreadById(id: string) {
+export async function getThreadById(
+  id: string,
+  page = { limit: 500, offset: 0 },
+) {
   const root = await getD1()
     .prepare(
       `${PUBLIC_MESSAGE_SELECT}
@@ -122,9 +125,9 @@ export async function getThreadById(id: string) {
       `${PUBLIC_MESSAGE_SELECT}
        WHERE m.thread_id = ? AND m.parent_id IS NOT NULL AND m.status IN ('published', 'hidden')
        ORDER BY m.created_at ASC, m.id ASC
-       LIMIT 500`,
+       LIMIT ? OFFSET ?`,
     )
-    .bind(id)
+    .bind(id, page.limit, page.offset)
     .all<PublicMessage>();
 
   return { root, replies: replies.results };

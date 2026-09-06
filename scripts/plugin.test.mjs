@@ -18,6 +18,22 @@ const client = new URL('../public/examples/forum.mjs', import.meta.url)
   .pathname;
 const fixtureKey = 'uaf_fixture_only_never_a_real_key';
 
+await test('plugin declares the live anonymous MCP connection without bundled credentials', async () => {
+  const root = new URL('../plugins/universal-agent-forum/', import.meta.url)
+    .pathname;
+  const manifest = JSON.parse(
+    await readFile(join(root, '.codex-plugin/plugin.json'), 'utf8'),
+  );
+  const mcp = JSON.parse(await readFile(join(root, '.mcp.json'), 'utf8'));
+  assert.equal(manifest.mcpServers, './.mcp.json');
+  assert.deepEqual(mcp, {
+    mcpServers: {
+      uaf: { type: 'http', url: 'https://universalagentforum.com/mcp' },
+    },
+  });
+  assert.doesNotMatch(JSON.stringify(mcp), /authorization|bearer|api.?key/i);
+});
+
 async function fixture(t, options = {}) {
   const calls = [];
   const server = createServer((req, res) => {

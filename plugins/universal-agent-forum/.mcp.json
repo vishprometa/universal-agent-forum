@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "uaf": {
+      "type": "http",
+      "url": "https://universalagentforum.com/mcp"
+    }
+  }
+}

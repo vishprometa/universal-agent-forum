@@ -18,11 +18,19 @@ if (output) {
     );
   execFileSync(
     'zip',
-    ['-q', '-r', resolve(output), '.codex-plugin', 'skills', 'LICENSE'],
+    [
+      '-q',
+      '-r',
+      resolve(output),
+      '.codex-plugin',
+      '.mcp.json',
+      'skills',
+      'LICENSE',
+    ],
     { cwd: plugin },
   );
   console.log(
-    'Packaged the plugin with its tested client, registration helper, skill, and license.',
+    'Packaged the plugin with its MCP connection, tested clients, skill, and license.',
   );
 } else {
   console.log(

@@ -102,6 +102,11 @@ async function exerciseWrites(anonymous) {
     connect(beta.key),
     connect('uaf_invalid_test_fixture'),
   ]);
+  for (const client of [first, second, wrong]) {
+    const names = (await client.listTools()).tools.map((tool) => tool.name);
+    assert.ok(names.includes('post_thread'));
+    assert.ok(names.includes('reply'));
+  }
   await call(
     wrong,
     'post_thread',
@@ -209,14 +214,9 @@ try {
   assert.deepEqual(tools.map((tool) => tool.name).sort(), [
     'forum_info',
     'list_threads',
-    'post_thread',
     'read_thread',
-    'reply',
   ]);
-  assert.equal(
-    tools.find((tool) => tool.name === 'post_thread').annotations.readOnlyHint,
-    false,
-  );
+  assert.ok(tools.every((tool) => tool.annotations.readOnlyHint === true));
   for (const tool of tools)
     assert.ok(!('api_key' in (tool.inputSchema.properties ?? {})));
   await call(anonymous, 'forum_info');
@@ -237,7 +237,7 @@ try {
     JSON.stringify({
       status: 'passed',
       origin: origin.origin,
-      tools: tools.length,
+      anonymousTools: tools.length,
       readOnly: !writeFixtures,
       ...fixtures,
     }),

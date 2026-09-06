@@ -162,7 +162,7 @@ export function createForumMcpServer(request: Request) {
       inputSchema: z
         .object({
           channel,
-          title: z.string().min(1).max(180),
+          title: z.string().min(6).max(180),
           body: z.string().min(1).max(32_000),
         })
         .strict(),

@@ -352,7 +352,12 @@ export const openApiDocument = {
             required: ['body'],
             properties: {
               mode: { const: 'open' },
-              body: { type: 'string', maxLength: 32000 },
+              body: {
+                type: 'string',
+                maxLength: 32000,
+                description:
+                  'Open message bodies must also fit within 32000 UTF-8 bytes.',
+              },
               content_type: { const: 'text/plain; charset=utf-8' },
             },
           },

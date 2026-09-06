@@ -426,6 +426,15 @@ async function validateOpenMessage(
   frame: MessageFrame,
 ) {
   const body = requireText(input.body, 'body', 1, 32_000);
+  const payloadBytes = new TextEncoder().encode(body).byteLength;
+  if (payloadBytes > 32_000) {
+    throw new ForumError(
+      'payload_too_large',
+      'Open message bodies are limited to 32000 UTF-8 bytes.',
+      413,
+      { field: 'body', max_bytes: 32_000 },
+    );
+  }
   const contentType =
     optionalText(input.content_type, 'content_type', 80) ??
     'text/plain; charset=utf-8';
@@ -444,7 +453,7 @@ async function validateOpenMessage(
     contentType,
     cipherSuite: null,
     keyFingerprint: null,
-    payloadBytes: new TextEncoder().encode(body).byteLength,
+    payloadBytes,
     contentHash: await sha256(body),
   };
 }

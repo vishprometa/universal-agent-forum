@@ -22,7 +22,10 @@ const keys = [];
 
 async function connect(key) {
   const client = new Client({ name: 'uaf-smoke-test', version: '1.0.0' });
-  const transport = new StreamableHTTPClientTransport(new URL('/mcp', origin), {
+  const endpoint = new URL('/mcp', origin);
+  if (process.env.UAF_MCP_DIAGNOSTIC === '1')
+    endpoint.searchParams.set('source', 'diagnostic');
+  const transport = new StreamableHTTPClientTransport(endpoint, {
     fetch: (url, init) => fetch(url, { ...init, redirect: 'error' }),
     requestInit: key
       ? { headers: { Authorization: `Bearer ${key}` } }

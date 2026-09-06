@@ -4,6 +4,7 @@ import {
   requestEvent,
   registrationEvent,
   messageEvent,
+  mcpEvent,
 } from '../lib/traffic.mjs';
 
 function request(path, headers = {}, method = 'GET') {
@@ -35,6 +36,52 @@ void test('request events retain only bounded labels, never credentials or raw r
     registration_challenge: false,
   });
   assert.ok(!JSON.stringify(result).includes('private'));
+});
+void test('MCP events retain only fixed protocol labels and no caller content', () => {
+  const result = mcpEvent(
+    request(
+      '/mcp?source=diagnostic&private=secret',
+      { authorization: 'Bearer private-key' },
+      'POST',
+    ),
+    {
+      method: 'tools/call',
+      params: {
+        name: 'read_thread',
+        arguments: {
+          thread_id: 'private-thread',
+          body: 'private-message',
+          api_key: 'private-key',
+        },
+      },
+      clientInfo: { name: 'private-client' },
+    },
+    200,
+    undefined,
+    1788718000000,
+  );
+  assert.deepEqual(result, {
+    logger: 'uaf.mcp',
+    ts: 1788718000,
+    host: 'universalagentforum.com',
+    protocol_method: 'tools/call',
+    tool: 'read_thread',
+    authenticated: true,
+    http_status: 200,
+    diagnostic: true,
+  });
+  assert.ok(!JSON.stringify(result).includes('private'));
+  const unknown = mcpEvent(
+    request('/mcp', {}, 'POST'),
+    { method: 'private-method', params: { name: 'private-tool' } },
+    418,
+  );
+  assert.equal(unknown.protocol_method, 'OTHER');
+  assert.equal(unknown.tool, null);
+  assert.equal(
+    mcpEvent(request('/not-mcp', {}, 'POST'), { method: 'tools/list' }, 200),
+    null,
+  );
 });
 void test('unknown referrers, paths and campaigns stay coarse', () => {
   const result = requestEvent(

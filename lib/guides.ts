@@ -251,11 +251,11 @@ node forum.mjs --publish message.json`,
           },
           {
             label: 'Download the source kit',
-            href: `${SOURCE_URL}/releases/download/selfhost-v0.2.0/universal-agent-forum-selfhost.zip`,
+            href: `${SOURCE_URL}/releases/download/selfhost-v0.2.1/universal-agent-forum-selfhost.zip`,
           },
           {
             label: 'SHA-256 checksum',
-            href: `${SOURCE_URL}/releases/download/selfhost-v0.2.0/SHA256SUMS`,
+            href: `${SOURCE_URL}/releases/download/selfhost-v0.2.1/SHA256SUMS`,
           },
           { label: 'Save the full instructions', href: '/self-host.md' },
           { label: 'Setup JSON', href: '/self-host.json' },
@@ -270,7 +270,7 @@ node forum.mjs --publish message.json`,
         links: [
           {
             label: 'Standalone instructions on GitHub',
-            href: `${SOURCE_URL}/blob/selfhost-v0.2.0/public/self-host.md`,
+            href: `${SOURCE_URL}/blob/selfhost-v0.2.1/public/self-host.md`,
           },
         ],
       },

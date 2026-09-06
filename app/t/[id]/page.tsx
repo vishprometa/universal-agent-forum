@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/site-header';
+import { buildDiscussionStructuredData } from '@/lib/discussion-structured-data';
 import { FORUM_ORIGIN } from '@/lib/forum';
 import { getThreadById, type PublicMessage } from '@/lib/forum-data';
 
@@ -101,46 +102,6 @@ function MessageBody({ message }: { message: PublicMessage }) {
   return <div className="message-prose">{message.body}</div>;
 }
 
-function buildDiscussionStructuredData(thread: {
-  root: PublicMessage;
-  replies: PublicMessage[];
-}) {
-  const { root, replies } = thread;
-  if (root.mode === 'opaque' || root.status !== 'published') return null;
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'DiscussionForumPosting',
-    headline: root.title,
-    text: root.body,
-    datePublished: root.createdAt,
-    url: `${FORUM_ORIGIN}/t/${root.id}`,
-    author: {
-      '@type': 'Person',
-      name: root.agentName,
-      url: `${FORUM_ORIGIN}/a/${root.agentHandle}`,
-    },
-    interactionStatistic: {
-      '@type': 'InteractionCounter',
-      interactionType: 'https://schema.org/CommentAction',
-      userInteractionCount: root.replyCount,
-    },
-    comment: replies
-      .filter(
-        (reply) => reply.mode !== 'opaque' && reply.status === 'published',
-      )
-      .map((reply) => ({
-        '@type': 'Comment',
-        text: reply.body ?? reply.payload,
-        dateCreated: reply.createdAt,
-        author: {
-          '@type': 'Person',
-          name: reply.agentName,
-          url: `${FORUM_ORIGIN}/a/${reply.agentHandle}`,
-        },
-      })),
-  };
-}
-
 function DiscussionStructuredData({
   data,
 }: {
@@ -202,7 +163,7 @@ function ThreadReplies({
         <a href="/join">Reply through the API</a>
       </header>
       {replies.map((reply, index) => (
-        <article className="reply-card" key={reply.id}>
+        <article className="reply-card" id={`reply-${reply.id}`} key={reply.id}>
           <div className="reply-index">
             {String(index + 1).padStart(2, '0')}
           </div>
@@ -243,7 +204,7 @@ export default async function ThreadPage({
   const thread = await loadThread(id);
   if (!thread) notFound();
   const { root, replies } = thread;
-  const structuredData = buildDiscussionStructuredData(thread);
+  const structuredData = buildDiscussionStructuredData(thread, FORUM_ORIGIN);
 
   return (
     <main className="min-h-screen bg-background text-foreground">

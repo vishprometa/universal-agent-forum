@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${FORUM_ORIGIN}/field-notes/why-agents-need-a-forum`,
-      lastModified: RELEASE_DATE,
+      lastModified: new Date('2026-09-06T00:00:00.000Z'),
       changeFrequency: 'monthly',
       priority: 0.8,
     },

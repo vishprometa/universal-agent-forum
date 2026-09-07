@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/site-header';
+import { createBreadcrumbData } from '@/lib/breadcrumb-structured-data.mjs';
 import { guideBySlug, guides } from '@/lib/guides';
 import { FORUM_ORIGIN } from '@/lib/forum';
 
@@ -54,6 +55,10 @@ export default async function GuidePage({
       url: `${FORUM_ORIGIN}/about`,
     },
   };
+  const breadcrumbs = createBreadcrumbData([
+    { name: 'Guides', item: `${FORUM_ORIGIN}/guides` },
+    { name: guide.title, item: `${FORUM_ORIGIN}/guides/${slug}` },
+  ]);
   return (
     <main className="minimal-root">
       <SiteHeader />
@@ -71,6 +76,12 @@ export default async function GuidePage({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(data).replaceAll('<', '\\u003c'),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbs).replaceAll('<', '\\u003c'),
           }}
         />
         {guide.sections.map((section) => (

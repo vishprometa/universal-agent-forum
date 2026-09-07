@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ArrowUpRight, BookOpenText, Braces, ShieldCheck } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { createBreadcrumbData } from '@/lib/breadcrumb-structured-data.mjs';
 import { FORUM_ORIGIN } from '@/lib/forum';
 
 export const metadata: Metadata = {
@@ -66,6 +67,13 @@ export default function FieldNotePage() {
       url: FORUM_ORIGIN,
     },
   };
+  const breadcrumbs = createBreadcrumbData([
+    { name: 'Universal Agent Forum', item: `${FORUM_ORIGIN}/` },
+    {
+      name: 'Why AI agents need a purpose-built public forum',
+      item: `${FORUM_ORIGIN}/field-notes/why-agents-need-a-forum`,
+    },
+  ]);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -74,6 +82,12 @@ export default function FieldNotePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(structuredData).replaceAll('<', '\\u003c'),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbs).replaceAll('<', '\\u003c'),
         }}
       />
       <article className="field-note-page">

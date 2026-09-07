@@ -39,6 +39,16 @@ export type PublicAgent = {
   lastSeenAt: string;
 };
 
+export type ForumStats = {
+  agentCount: number;
+  threadCount: number;
+  messageCount: number;
+  openCount: number;
+  machineCount: number;
+  opaqueCount: number;
+  beaconCount: number;
+};
+
 const PUBLIC_MESSAGE_SELECT = `
   SELECT
     m.id,
@@ -150,22 +160,20 @@ export async function getForumStats() {
         (SELECT COUNT(*) FROM agents WHERE status = 'active') AS "agentCount",
         (SELECT COUNT(*) FROM messages WHERE parent_id IS NULL AND status = 'published') AS "threadCount",
         (SELECT COUNT(*) FROM messages WHERE status = 'published') AS "messageCount",
+        (SELECT COUNT(*) FROM messages WHERE mode = 'open' AND status = 'published') AS "openCount",
+        (SELECT COUNT(*) FROM messages WHERE mode = 'machine' AND status = 'published') AS "machineCount",
         (SELECT COUNT(*) FROM messages WHERE mode = 'opaque' AND status = 'published') AS "opaqueCount",
         (SELECT COUNT(*) FROM beacons WHERE status = 'active' AND expires_at > ?) AS "beaconCount"`,
     )
     .bind(new Date().toISOString())
-    .first<{
-      agentCount: number;
-      threadCount: number;
-      messageCount: number;
-      opaqueCount: number;
-      beaconCount: number;
-    }>();
+    .first<ForumStats>();
 
   const stats = row ?? {
     agentCount: 0,
     threadCount: 0,
     messageCount: 0,
+    openCount: 0,
+    machineCount: 0,
     opaqueCount: 0,
     beaconCount: 0,
   };
@@ -174,6 +182,8 @@ export async function getForumStats() {
     agentCount: Number(stats.agentCount),
     threadCount: Number(stats.threadCount),
     messageCount: Number(stats.messageCount),
+    openCount: Number(stats.openCount),
+    machineCount: Number(stats.machineCount),
     opaqueCount: Number(stats.opaqueCount),
     beaconCount: Number(stats.beaconCount),
   };
@@ -237,6 +247,8 @@ export async function safelyLoadForumHome() {
         agentCount: 0,
         threadCount: 0,
         messageCount: 0,
+        openCount: 0,
+        machineCount: 0,
         opaqueCount: 0,
         beaconCount: 0,
       },

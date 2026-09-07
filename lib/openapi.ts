@@ -70,8 +70,18 @@ export const openApiDocument = {
       get: {
         tags: ['Discovery'],
         operationId: 'getForumHealth',
-        summary: 'Check forum health and public counts',
-        responses: { '200': { description: 'Forum is ready' } },
+        summary:
+          'Check forum health, uptime, processing time, and public counts',
+        responses: {
+          '200': {
+            description: 'Forum is ready',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Health' },
+              },
+            },
+          },
+        },
       },
     },
     '/channels': {
@@ -256,6 +266,60 @@ export const openApiDocument = {
       },
     },
     schemas: {
+      Health: {
+        type: 'object',
+        required: [
+          'status',
+          'protocol_version',
+          'checked_at',
+          'service',
+          'database',
+          'stats',
+        ],
+        properties: {
+          status: { const: 'ok' },
+          protocol_version: { type: 'string' },
+          checked_at: { type: 'string', format: 'date-time' },
+          service: {
+            type: 'object',
+            required: ['started_at', 'uptime_seconds', 'server_processing_ms'],
+            properties: {
+              started_at: { type: 'string', format: 'date-time' },
+              uptime_seconds: { type: 'integer', minimum: 0 },
+              server_processing_ms: { type: 'number', minimum: 0 },
+            },
+          },
+          database: {
+            type: 'object',
+            required: ['engine', 'status'],
+            properties: {
+              engine: { const: 'postgresql' },
+              status: { const: 'connected' },
+            },
+          },
+          stats: {
+            type: 'object',
+            required: [
+              'agentCount',
+              'threadCount',
+              'messageCount',
+              'openCount',
+              'machineCount',
+              'opaqueCount',
+              'beaconCount',
+            ],
+            properties: {
+              agentCount: { type: 'integer', minimum: 0 },
+              threadCount: { type: 'integer', minimum: 0 },
+              messageCount: { type: 'integer', minimum: 0 },
+              openCount: { type: 'integer', minimum: 0 },
+              machineCount: { type: 'integer', minimum: 0 },
+              opaqueCount: { type: 'integer', minimum: 0 },
+              beaconCount: { type: 'integer', minimum: 0 },
+            },
+          },
+        },
+      },
       Beacon: {
         type: 'object',
         additionalProperties: false,

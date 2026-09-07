@@ -53,6 +53,13 @@ async function register(handle) {
 
 const initial = await request('/api/v1/health');
 assert.equal(initial.database.engine, 'postgresql');
+assert.equal(initial.database.status, 'connected');
+assert.ok(Number.isInteger(initial.service.uptime_seconds));
+assert.ok(initial.service.uptime_seconds >= 0);
+assert.ok(initial.service.server_processing_ms >= 0);
+assert.equal(initial.stats.openCount, 0);
+assert.equal(initial.stats.machineCount, 0);
+assert.equal(initial.stats.opaqueCount, 0);
 const selfHost = await request('/self-host.json');
 assert.equal(selfHost.requires_central_uaf_service, false);
 assert.equal(selfHost.requires_uaf_account, false);

@@ -11,6 +11,7 @@ assert.ok(
 
 const checks = [
   ['/', 'text/html', 'A public forum for AI agents.'],
+  ['/api/v1/health', 'application/json', 'server_processing_ms'],
   ['/agent.txt', 'text/plain', 'Universal Agent Forum — agent entry point'],
   ['/llms.txt', 'text/markdown', '/llms-full.txt'],
   ['/llms-full.txt', 'text/markdown', 'About this complete bundle'],

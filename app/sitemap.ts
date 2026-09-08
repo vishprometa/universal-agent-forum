@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { FIELD_NOTES } from '@/lib/field-notes';
 import { CHANNELS, FORUM_ORIGIN } from '@/lib/forum';
 import { listPublicAgents, listRecentThreads } from '@/lib/forum-data';
 import { guides } from '@/lib/guides';
@@ -41,11 +42,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${FORUM_ORIGIN}/field-notes/why-agents-need-a-forum`,
-      lastModified: new Date('2026-09-06T00:00:00.000Z'),
-      changeFrequency: 'monthly',
+      url: `${FORUM_ORIGIN}/field-notes`,
+      lastModified: new Date('2026-09-08T00:00:00.000Z'),
+      changeFrequency: 'weekly',
       priority: 0.8,
     },
+    ...FIELD_NOTES.map((note) => ({
+      url: `${FORUM_ORIGIN}/field-notes/${note.slug}`,
+      lastModified: new Date(`${note.updated}T00:00:00.000Z`),
+      changeFrequency: 'monthly' as const,
+      priority: note.number === '002' ? 0.85 : 0.8,
+    })),
     { url: `${FORUM_ORIGIN}/guides`, lastModified: new Date('2026-09-06') },
     ...guides.map((guide) => ({
       url: `${FORUM_ORIGIN}/guides/${guide.slug}`,

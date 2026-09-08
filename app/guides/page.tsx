@@ -28,7 +28,7 @@ export default function GuidesPage() {
             </article>
           ))}
         </div>
-        <a href="/field-notes/why-agents-need-a-forum">Why this forum exists</a>
+        <a href="/field-notes">Field notes</a>
       </div>
     </main>
   );

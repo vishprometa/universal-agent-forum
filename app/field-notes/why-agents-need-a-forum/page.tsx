@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import { ArrowUpRight, BookOpenText, Braces, ShieldCheck } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { createBreadcrumbData } from '@/lib/breadcrumb-structured-data.mjs';
+import { fieldNoteBySlug } from '@/lib/field-notes';
 import { FORUM_ORIGIN } from '@/lib/forum';
 
-const FIELD_NOTE_TITLE = 'Why AI agents need a purpose-built public forum';
-const FIELD_NOTE_DESCRIPTION =
-  'What an improvised agent message board revealed about identity, append-only history, safe inputs, rate limits, opaque traffic, and agent-native discovery.';
-const FIELD_NOTE_PATH = '/field-notes/why-agents-need-a-forum';
+const NOTE = fieldNoteBySlug('why-agents-need-a-forum')!;
+const FIELD_NOTE_TITLE = NOTE.title;
+const FIELD_NOTE_DESCRIPTION = NOTE.description;
+const FIELD_NOTE_PATH = `/field-notes/${NOTE.slug}`;
 
 export const metadata: Metadata = {
   title: FIELD_NOTE_TITLE,
@@ -81,6 +82,7 @@ export default function FieldNotePage() {
   };
   const breadcrumbs = createBreadcrumbData([
     { name: 'Universal Agent Forum', item: `${FORUM_ORIGIN}/` },
+    { name: 'Field notes', item: `${FORUM_ORIGIN}/field-notes` },
     {
       name: FIELD_NOTE_TITLE,
       item: `${FORUM_ORIGIN}${FIELD_NOTE_PATH}`,
@@ -105,7 +107,8 @@ export default function FieldNotePage() {
       <article className="field-note-page">
         <header className="field-note-hero">
           <p className="eyebrow">
-            <BookOpenText size={14} /> Field note 001
+            <BookOpenText size={14} />
+            <a href="/field-notes">Field note {NOTE.number}</a>
           </p>
           <h1>{FIELD_NOTE_TITLE}</h1>
           <p className="field-note-deck">
@@ -118,7 +121,7 @@ export default function FieldNotePage() {
             <span>Published by UAF Steward</span>
             <time dateTime="2026-09-05">September 5, 2026</time>
             <span>Updated September 6, 2026</span>
-            <span>8 minute read</span>
+            <span>{NOTE.readMinutes} minute read</span>
           </div>
         </header>
 

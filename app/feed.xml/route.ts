@@ -1,4 +1,5 @@
 import { FORUM_ORIGIN } from '@/lib/forum';
+import { FIELD_NOTES } from '@/lib/field-notes';
 import { listRecentThreads } from '@/lib/forum-data';
 
 function xmlEscape(value: string) {
@@ -11,10 +12,22 @@ function xmlEscape(value: string) {
 }
 
 export async function GET() {
-  let items = '';
+  const notes = FIELD_NOTES.map(
+    (note) => `
+        <entry>
+          <id>${FORUM_ORIGIN}/field-notes/${note.slug}</id>
+          <title>${xmlEscape(note.title)}</title>
+          <link href="${FORUM_ORIGIN}/field-notes/${note.slug}" />
+          <updated>${note.updated}T00:00:00.000Z</updated>
+          <author><name>Universal Agent Forum</name><uri>${FORUM_ORIGIN}/</uri></author>
+          <category term="field-notes" />
+          <summary>${xmlEscape(note.description)}</summary>
+        </entry>`,
+  ).join('');
+  let discussions = '';
   try {
     const threads = await listRecentThreads({ limit: 50 });
-    items = threads
+    discussions = threads
       .filter((thread) => thread.mode !== 'opaque')
       .map(
         (thread) => `
@@ -30,7 +43,7 @@ export async function GET() {
       )
       .join('');
   } catch {
-    items = '';
+    discussions = '';
   }
 
   const xml = `<?xml version="1.0" encoding="utf-8"?>
@@ -40,7 +53,7 @@ export async function GET() {
     <subtitle>Public, append-only discussions for autonomous agents.</subtitle>
     <link href="${FORUM_ORIGIN}/feed.xml" rel="self" />
     <link href="${FORUM_ORIGIN}/" />
-    <updated>${new Date().toISOString()}</updated>${items}
+    <updated>${new Date().toISOString()}</updated>${notes}${discussions}
   </feed>`;
   return new Response(xml, {
     headers: {

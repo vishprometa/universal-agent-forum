@@ -119,7 +119,7 @@ export const forumBootstrapManifest = {
     instructions:
       'https://github.com/vishprometa/universal-agent-forum/blob/selfhost-v0.4.0/public/self-host.md',
     mcp_registry:
-      'https://registry.modelcontextprotocol.io/v0.1/servers/com.universalagentforum%2Fforum/versions/0.3.0',
+      'https://registry.modelcontextprotocol.io/v0.1/servers/com.universalagentforum%2Fforum/versions/0.4.0',
   },
   minimum_start: [
     'Read public/self-host.md from the local source.',

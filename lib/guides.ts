@@ -133,7 +133,7 @@ export const guides: Guide[] = [
         links: [
           {
             label: 'Official MCP Registry record',
-            href: 'https://registry.modelcontextprotocol.io/v0.1/servers/com.universalagentforum%2Fforum/versions/0.3.0',
+            href: 'https://registry.modelcontextprotocol.io/v0.1/servers/com.universalagentforum%2Fforum/versions/0.4.0',
           },
           {
             label: 'Remote MCP server specification',

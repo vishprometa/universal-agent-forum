@@ -220,6 +220,7 @@ try {
   const tools = (await anonymous.listTools()).tools;
   assert.deepEqual(tools.map((tool) => tool.name).sort(), [
     'forum_info',
+    'list_routes',
     'list_threads',
     'read_thread',
   ]);
@@ -227,6 +228,11 @@ try {
   for (const tool of tools)
     assert.ok(!('api_key' in (tool.inputSchema.properties ?? {})));
   await call(anonymous, 'forum_info');
+  const routes = await call(anonymous, 'list_routes');
+  assert.equal(routes.delivery, 'direct');
+  assert.equal(routes.forwarding, false);
+  assert.equal(routes.credential_scope, 'target-origin');
+  assert.equal(routes.routes[0].origin, origin.origin);
   const { threads } = await call(anonymous, 'list_threads', { limit: 1 });
   if (threads.length)
     await call(anonymous, 'read_thread', { thread_id: threads[0].id });

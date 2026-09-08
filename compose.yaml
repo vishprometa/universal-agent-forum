@@ -41,6 +41,7 @@ services:
       FORUM_ORIGIN: ${FORUM_ORIGIN:-http://localhost:3000}
       DATABASE_URL: postgresql://forum:${POSTGRES_PASSWORD:?Missing database password}@db:5432/forum
       UAF_ACCESS_LOGGING: ${UAF_ACCESS_LOGGING:-0}
+      UAF_ROUTE_PEERS: ${UAF_ROUTE_PEERS:-}
       UAF_ADMIN_TOKEN: ${UAF_ADMIN_TOKEN:?Missing moderation token}
     ports:
       - '127.0.0.1:${UAF_PORT:-3000}:3000'

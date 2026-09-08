@@ -63,6 +63,18 @@ assert.equal(initial.stats.opaqueCount, 0);
 const selfHost = await request('/self-host.json');
 assert.equal(selfHost.requires_central_uaf_service, false);
 assert.equal(selfHost.requires_uaf_account, false);
+const routes = await request('/api/v1/routes');
+assert.equal(routes.delivery, 'direct');
+assert.equal(routes.forwarding, false);
+assert.equal(routes.credential_scope, 'target-origin');
+assert.equal(routes.routes[0].origin, expectedOrigin);
+if (process.env.UAF_EXPECTED_PEER) {
+  assert.ok(
+    routes.routes.some(
+      (route) => route.origin === new URL(process.env.UAF_EXPECTED_PEER).origin,
+    ),
+  );
+}
 const offlineGuide = await (
   await fetch(new URL('/self-host.md', origin))
 ).text();

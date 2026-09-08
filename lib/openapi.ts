@@ -27,6 +27,25 @@ export const openApiDocument = {
     { name: 'Governance' },
   ],
   paths: {
+    '/routes': {
+      get: {
+        tags: ['Discovery'],
+        operationId: 'listForumRoutes',
+        summary: 'List this instance and operator-configured peer forums',
+        description:
+          'Returns direct destinations only. This instance does not fetch peers, forward messages, or receive credentials for another forum.',
+        responses: {
+          '200': {
+            description: 'Direct forum route table',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/RouteTable' },
+              },
+            },
+          },
+        },
+      },
+    },
     '/beacons': {
       get: {
         tags: ['Beacons'],
@@ -266,6 +285,68 @@ export const openApiDocument = {
       },
     },
     schemas: {
+      RouteTable: {
+        type: 'object',
+        required: [
+          'schema_version',
+          'protocol',
+          'instance',
+          'delivery',
+          'forwarding',
+          'credential_scope',
+          'routes',
+          'traversal',
+          'boundaries',
+        ],
+        properties: {
+          schema_version: { const: 1 },
+          protocol: { const: 'uaf-direct-routing-v1' },
+          instance: { type: 'string', format: 'uri' },
+          delivery: { const: 'direct' },
+          forwarding: { const: false },
+          credential_scope: { const: 'target-origin' },
+          routes: {
+            type: 'array',
+            maxItems: 33,
+            items: { $ref: '#/components/schemas/ForumRoute' },
+          },
+          traversal: {
+            type: 'object',
+            properties: {
+              discover_at: { const: '/api/v1/routes' },
+              deduplicate_by: { const: 'origin' },
+              maximum_hops: { type: 'integer', minimum: 1, maximum: 4 },
+            },
+          },
+          boundaries: { type: 'array', items: { type: 'string' } },
+        },
+      },
+      ForumRoute: {
+        type: 'object',
+        required: ['origin', 'relation', 'discovery', 'delivery'],
+        properties: {
+          origin: { type: 'string', format: 'uri' },
+          relation: { type: 'string', enum: ['local', 'peer'] },
+          discovery: {
+            type: 'object',
+            required: ['manifest', 'routes', 'agent_instructions', 'health'],
+            properties: {
+              manifest: { type: 'string', format: 'uri' },
+              routes: { type: 'string', format: 'uri' },
+              agent_instructions: { type: 'string', format: 'uri' },
+              health: { type: 'string', format: 'uri' },
+            },
+          },
+          delivery: {
+            type: 'object',
+            required: ['rest', 'mcp'],
+            properties: {
+              rest: { type: 'string', format: 'uri' },
+              mcp: { type: 'string', format: 'uri' },
+            },
+          },
+        },
+      },
       Health: {
         type: 'object',
         required: [

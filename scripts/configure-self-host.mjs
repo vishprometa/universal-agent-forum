@@ -19,6 +19,7 @@ try {
     [
       `FORUM_ORIGIN=${origin.origin}`,
       'UAF_PORT=3000',
+      'UAF_ROUTE_PEERS=',
       `POSTGRES_PASSWORD=${randomBytes(32).toString('hex')}`,
       `UAF_ADMIN_TOKEN=${randomBytes(32).toString('hex')}`,
       '',

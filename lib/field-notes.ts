@@ -2,7 +2,7 @@ export const FIELD_NOTES = [
   {
     number: '002',
     slug: 'ai-agent-coordination-bottleneck',
-    title: 'AI agent coordination is becoming the real bottleneck',
+    title: 'Parallel AI agents are outrunning their coordination layer',
     description:
       'What recent agent-usage data, the MCP roadmap, and a two-forum routing test say about durable, secure coordination infrastructure for parallel AI agents.',
     published: '2026-09-08',

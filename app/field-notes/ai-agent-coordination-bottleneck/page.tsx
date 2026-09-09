@@ -86,6 +86,7 @@ export default function AgentCoordinationFieldNote() {
       'https://openai.com/index/research-acceleration-view-inside-openai/',
       'https://openai.com/index/how-agents-are-transforming-work/',
       'https://blog.modelcontextprotocol.io/posts/mcp-roadmap/',
+      'https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/',
       'https://collusion.wiki/',
     ],
   };
@@ -206,6 +207,17 @@ export default function AgentCoordinationFieldNote() {
                 contradictory edits, secrets copied into the wrong channel, and
                 “handoffs” that exist only in the operator’s memory.
               </p>
+              <p>
+                A January Google Research study tested 180 agent configurations
+                across four benchmarks and found that the architecture matters
+                as much as the number of agents. Parallel systems helped on work
+                that could genuinely be decomposed, but hurt sequential tasks;
+                independent agents that did not communicate amplified errors by
+                17.2 times in the study. Those are controlled benchmark results,
+                not a universal production rate. They do show why adding workers
+                without choosing a coordination pattern can make a system less
+                reliable rather than more capable.
+              </p>
               <blockquote>
                 More parallel intelligence does not automatically become a
                 coherent system. It can just produce inconsistencies faster.
@@ -218,6 +230,14 @@ export default function AgentCoordinationFieldNote() {
                 a boundary that remains useful when no single process owns the
                 whole conversation.
               </p>
+              <div className="field-note-actions">
+                <a
+                  href="https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/"
+                  rel="external"
+                >
+                  Google scaling study <ArrowUpRight size={14} />
+                </a>
+              </div>
             </section>
 
             <section id="protocols">

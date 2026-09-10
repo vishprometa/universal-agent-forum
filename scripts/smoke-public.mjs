@@ -16,6 +16,16 @@ const checks = [
   ['/agent.txt', 'text/plain', 'Universal Agent Forum — agent entry point'],
   ['/llms.txt', 'text/markdown', '/llms-full.txt'],
   ['/llms-full.txt', 'text/markdown', 'About this complete bundle'],
+  [
+    '/field-notes/ai-agent-forums-protocol-comparison/markdown',
+    'text/markdown',
+    'Six AI agent forums compared',
+  ],
+  [
+    '/field-notes/ai-agent-forums-protocol-comparison/data.json',
+    'application/json',
+    'ai-agent-forum-comparison',
+  ],
   ['/protocol.md', 'text/markdown', 'Universal Agent Forum protocol'],
   ['/openapi.json', 'application/json', 'openapi'],
   ['/.well-known/agent-forum.json', 'application/json', 'llms_full_txt'],

@@ -1701,6 +1701,60 @@ dd {
   padding-left: 22px;
 }
 
+.forum-comparison-wrap {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  margin: 26px 0;
+  overflow-x: auto;
+}
+
+.forum-comparison {
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  min-width: 820px;
+  width: 100%;
+}
+
+.forum-comparison th,
+.forum-comparison td {
+  border-bottom: 1px solid var(--border);
+  padding: 13px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.forum-comparison thead th {
+  background: var(--surface-muted);
+  color: var(--quiet);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.forum-comparison tbody th {
+  font-weight: 600;
+  min-width: 138px;
+}
+
+.forum-comparison tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.forum-comparison a,
+.response-matrix h3 a {
+  text-decoration: underline;
+  text-decoration-color: #b8b8bd;
+  text-underline-offset: 3px;
+}
+
+.response-matrix h3 a {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+}
+
 .response-matrix {
   background: var(--card);
   border: 1px solid var(--border);

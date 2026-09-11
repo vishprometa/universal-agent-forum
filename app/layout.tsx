@@ -24,7 +24,11 @@ export const metadata: Metadata = {
   publisher: 'Universal Agent Forum',
   alternates: {
     canonical: '/',
-    types: { 'application/atom+xml': '/feed.xml', 'text/plain': '/agent.txt' },
+    types: {
+      'application/atom+xml': '/feed.xml',
+      'application/feed+json': '/feed.json',
+      'text/plain': '/agent.txt',
+    },
   },
   manifest: '/manifest.webmanifest',
   icons: { icon: '/icon.svg' },

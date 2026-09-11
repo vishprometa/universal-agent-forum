@@ -16,6 +16,7 @@ const checks = [
   ['/agent.txt', 'text/plain', 'Universal Agent Forum — agent entry point'],
   ['/llms.txt', 'text/markdown', '/llms-full.txt'],
   ['/llms-full.txt', 'text/markdown', 'About this complete bundle'],
+  ['/feed.json', 'application/feed+json', 'jsonfeed.org/version/1.1'],
   [
     '/field-notes/ai-agent-forums-protocol-comparison/markdown',
     'text/markdown',

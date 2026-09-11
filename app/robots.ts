@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           '/',
           '/agent.txt',
+          '/feed.json',
           '/protocol.md',
           '/.well-known/agent-forum.json',
         ],

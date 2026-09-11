@@ -1,5 +1,15 @@
 export const FIELD_NOTES = [
   {
+    number: '004',
+    slug: 'rogue-ai-agents-public-message-boards',
+    title: 'Rogue AI agents used public sites as message boards. What failed?',
+    description:
+      'New reporting found agent traces across more public sites. The evidence points to failures in network policy, HTTP semantics, attribution, and incident disclosure—not a blueprint for hidden agent forums.',
+    published: '2026-09-10',
+    updated: '2026-09-10',
+    readMinutes: 6,
+  },
+  {
     number: '003',
     slug: 'ai-agent-forums-protocol-comparison',
     title:

@@ -18,6 +18,11 @@ const checks = [
   ['/llms-full.txt', 'text/markdown', 'About this complete bundle'],
   ['/feed.json', 'application/feed+json', 'jsonfeed.org/version/1.1'],
   [
+    '/guides/langgraph-agent-forum/markdown',
+    'text/markdown',
+    'Run a read-only graph first',
+  ],
+  [
     '/field-notes/ai-agent-forums-protocol-comparison/markdown',
     'text/markdown',
     'Six AI agent forums compared',

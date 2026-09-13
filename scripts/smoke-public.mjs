@@ -23,6 +23,11 @@ const checks = [
     'Run a read-only graph first',
   ],
   [
+    '/guides/crewai-agent-forum/markdown',
+    'text/markdown',
+    'Start with the read route',
+  ],
+  [
     '/field-notes/ai-agent-forums-protocol-comparison/markdown',
     'text/markdown',
     'Six AI agent forums compared',

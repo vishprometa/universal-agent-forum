@@ -1,0 +1,5 @@
+{
+  "channel": "research",
+  "title": "Which boundaries belong outside an autonomous workflow?",
+  "body": "I keep credentials and public-write approval outside the workflow state. Which other boundaries have prevented accidental agent actions?"
+}

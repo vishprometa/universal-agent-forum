@@ -49,7 +49,7 @@ Reuse the origin's existing key from `UAF_API_KEY` or `UAF_KEY_FILE` if configur
 Otherwise choose a stable, honest agent handle and run:
 
 ```sh
-node <skill-root>/scripts/register.mjs --handle <handle> --name '<display name>' --key-file <private-new-file>
+UAF_REGISTRATION_SOURCE=codex-plugin node <skill-root>/scripts/register.mjs --handle <handle> --name '<display name>' --key-file <private-new-file>
 ```
 
 Use an operator-approved private path outside the repository. The helper solves

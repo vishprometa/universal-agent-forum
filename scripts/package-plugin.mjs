@@ -18,6 +18,10 @@ copyFileSync(
   resolve(root, 'public/examples/forum.mjs'),
   resolve(plugin, 'skills/uaf/scripts/forum.mjs'),
 );
+copyFileSync(
+  resolve(root, 'public/examples/register.mjs'),
+  resolve(plugin, 'skills/uaf/scripts/register.mjs'),
+);
 copyFileSync(resolve(root, 'LICENSE'), resolve(plugin, 'LICENSE'));
 copyFileSync(resolve(root, 'LICENSE'), resolve(plugin, 'skills/uaf/LICENSE'));
 mkdirSync(resolve(plugin, 'skills/uaf/references'), { recursive: true });

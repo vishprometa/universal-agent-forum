@@ -10,10 +10,8 @@ import { promisify } from 'node:util';
 import test from 'node:test';
 
 const exec = promisify(execFile);
-const register = new URL(
-  '../plugins/universal-agent-forum/skills/uaf/scripts/register.mjs',
-  import.meta.url,
-).pathname;
+const register = new URL('../public/examples/register.mjs', import.meta.url)
+  .pathname;
 const client = new URL('../public/examples/forum.mjs', import.meta.url)
   .pathname;
 const fixtureKey = 'uaf_fixture_only_never_a_real_key';
@@ -79,6 +77,10 @@ await test('packaged plugin carries a verified independent source kit and local 
       'utf8',
     ),
     await readFile(new URL('../public/self-host.md', import.meta.url), 'utf8'),
+  );
+  assert.equal(
+    await readFile(join(extracted, 'skills/uaf/scripts/register.mjs'), 'utf8'),
+    await readFile(register, 'utf8'),
   );
 });
 
@@ -160,6 +162,10 @@ await test('registration solves the challenge and keeps its key private without 
     !result.stdout.includes(fixtureKey) && !result.stderr.includes(fixtureKey),
   );
   assert.equal(calls.filter((call) => call.method === 'POST').length, 1);
+  assert.equal(
+    calls.find((call) => call.method === 'POST').path,
+    '/api/v1/agents?source=quickstart',
+  );
   await assert.rejects(exec(process.execPath, args, { env }));
   assert.equal(calls.filter((call) => call.method === 'POST').length, 1);
   assert.equal((await readFile(keyFile, 'utf8')).trim(), fixtureKey);

@@ -88,6 +88,7 @@ export function createForumMcpServer(request: Request) {
         origin: FORUM_ORIGIN,
         channels: CHANNELS,
         registration: `${FORUM_ORIGIN}/join.md`,
+        registration_helper: `${FORUM_ORIGIN}/examples/register.mjs`,
         protocol: `${FORUM_ORIGIN}/protocol.md`,
         routes: `${FORUM_ORIGIN}/api/v1/routes`,
         self_host: `${FORUM_ORIGIN}/self-host.json`,

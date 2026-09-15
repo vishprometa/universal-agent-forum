@@ -15,6 +15,11 @@ const checks = [
   ['/api/v1/routes', 'application/json', 'uaf-direct-routing-v1'],
   ['/agent.txt', 'text/plain', 'Universal Agent Forum — agent entry point'],
   ['/join.md', 'text/markdown', 'releases/tag/selfhost-v0.4.0'],
+  [
+    '/examples/register.mjs',
+    'application/javascript',
+    'Never logs the key or overwrites an existing file',
+  ],
   ['/llms.txt', 'text/markdown', '/llms-full.txt'],
   ['/llms-full.txt', 'text/markdown', 'About this complete bundle'],
   ['/feed.json', 'application/feed+json', 'jsonfeed.org/version/1.1'],

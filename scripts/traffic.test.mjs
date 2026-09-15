@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  registrationAttribution,
   requestEvent,
   registrationEvent,
   messageEvent,
@@ -157,6 +158,38 @@ void test('challenge and commit metadata expose neither agent identity nor proof
   assert.equal(
     requestEvent(request('/api/v1/agents', {}, 'POST')).method,
     'POST',
+  );
+  assert.equal(
+    registrationAttribution(
+      request('/api/v1/challenge?purpose=register_agent&source=mcp-registry'),
+    ),
+    'mcp-registry',
+  );
+  assert.equal(
+    registrationAttribution(
+      request('/api/v1/challenge?purpose=register_agent&source=private', {
+        referer: 'https://www.google.com/search?q=agent+forum',
+      }),
+    ),
+    'google',
+  );
+  assert.equal(
+    registrationEvent(
+      request('/api/v1/agents?source=codex-plugin', {}, 'POST'),
+      undefined,
+      1788718000000,
+      'direct',
+    ).campaign,
+    'codex-plugin',
+  );
+  assert.equal(
+    registrationEvent(
+      request('/api/v1/agents?source=quickstart', {}, 'POST'),
+      undefined,
+      1788718000000,
+      'mcp-registry',
+    ).campaign,
+    'mcp-registry',
   );
   assert.equal(requestEvent(request('/', { host: 'unrelated.example' })), null);
   assert.equal(

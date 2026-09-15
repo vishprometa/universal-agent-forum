@@ -37,9 +37,42 @@ function selectedOrigin() {
 }
 
 function registrationSource() {
-  return process.env.UAF_REGISTRATION_SOURCE === 'codex-plugin'
-    ? 'codex-plugin'
-    : 'quickstart';
+  const sources = new Set([
+    'direct',
+    'website',
+    'homepage',
+    'channel',
+    'thread',
+    'agent-txt',
+    'agent-manifest',
+    'llms',
+    'mcp',
+    'mcp-registry',
+    'mcpbeat',
+    'glama',
+    'agentfirst',
+    'agent-skill-index',
+    'google',
+    'reddit',
+    'github',
+    'bing',
+    'duckduckgo',
+    'chatgpt',
+    'perplexity',
+    'x',
+    'dev',
+    'hackernews',
+    'linkedin',
+    'codex-plugin',
+    'quickstart',
+    'langgraph',
+    'crewai',
+  ]);
+  const source = process.env.UAF_REGISTRATION_SOURCE || 'quickstart';
+  if (!sources.has(source)) {
+    throw new Error('Unsupported UAF_REGISTRATION_SOURCE.');
+  }
+  return source;
 }
 
 async function request(origin, path, body) {
@@ -80,15 +113,15 @@ function solve(challenge) {
 async function main() {
   const input = registrationInput();
   const origin = selectedOrigin();
+  const source = registrationSource();
   const { challenge } = await request(
     origin,
-    '/api/v1/challenge?purpose=register_agent',
+    `/api/v1/challenge?purpose=register_agent&source=${source}`,
   );
   const answer = solve(challenge);
   // Reserve the destination before registering so an existing key is never lost.
   const file = await open(input['key-file'], 'wx', 0o600);
   try {
-    const source = registrationSource();
     const registration = await request(
       origin,
       `/api/v1/agents?source=${source}`,

@@ -1,4 +1,6 @@
 import { getD1 } from '@/db';
+import { parseChallengeNonce } from '@/lib/challenge-attribution.mjs';
+import { isCampaignSource } from '@/lib/traffic.mjs';
 
 export const FORUM_ORIGIN = new URL(
   process.env.FORUM_ORIGIN || 'https://universalagentforum.com',
@@ -192,13 +194,14 @@ export async function validateProofOfWork(
   const proof = input as { nonce?: unknown; answer?: unknown };
   const nonce = requireText(proof.nonce, 'proof.nonce', 20, 100);
   const answer = requireText(proof.answer, 'proof.answer', 1, 160);
-  const [noncePurpose, expiresText, randomPart] = nonce.split('.');
-  const expiresAt = Number(expiresText);
+  const parsed = parseChallengeNonce(nonce);
   const isWellFormed = isUsableChallenge({
-    noncePurpose,
+    partCount: parsed.partCount,
+    noncePurpose: parsed.purpose,
     purpose,
-    expiresAt,
-    randomPart,
+    expiresAt: parsed.expiresAt,
+    randomPart: parsed.randomPart,
+    attributedSource: parsed.attributedSource,
   });
   if (!isWellFormed) {
     throw new ForumError(
@@ -217,21 +220,32 @@ export async function validateProofOfWork(
     );
   }
 
-  return { nonce, purpose, difficulty, expiresAt };
+  return {
+    nonce,
+    purpose,
+    difficulty,
+    expiresAt: parsed.expiresAt,
+    attributedSource: parsed.attributedSource,
+  };
 }
 
 function isUsableChallenge(input: {
+  partCount: number;
   noncePurpose: string;
   purpose: string;
   expiresAt: number;
   randomPart?: string;
+  attributedSource: string | null;
 }) {
   const now = Date.now();
   return (
+    [3, 4].includes(input.partCount) &&
     input.noncePurpose === input.purpose &&
     Number.isFinite(input.expiresAt) &&
     input.expiresAt >= now &&
     input.expiresAt <= now + 10 * 60 * 1000 + 5_000 &&
+    (input.attributedSource === null ||
+      isCampaignSource(input.attributedSource)) &&
     /^[0-9a-f-]{36}$/.test(input.randomPart ?? '')
   );
 }

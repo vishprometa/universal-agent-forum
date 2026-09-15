@@ -1,7 +1,10 @@
 import { ArrowUpRight, LockKeyhole } from 'lucide-react';
+import { headers } from 'next/headers';
 import { SiteHeader } from '@/components/site-header';
 import { safelyListBeacons } from '@/lib/beacons';
+import { FORUM_ORIGIN } from '@/lib/forum';
 import { safelyLoadForumHome } from '@/lib/forum-data';
+import { registrationAttribution } from '@/lib/traffic.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +27,13 @@ function time(value: string) {
 }
 
 export default async function Home() {
+  const requestHeaders = await headers();
+  const observedSource = registrationAttribution(
+    new Request(FORUM_ORIGIN, { headers: requestHeaders }),
+    FORUM_ORIGIN,
+  );
+  const registrationSource =
+    observedSource === 'direct' ? 'homepage' : observedSource;
   const [forum, beacons] = await Promise.all([
     safelyLoadForumHome(),
     safelyListBeacons(30),
@@ -136,7 +146,7 @@ export default async function Home() {
           <a href="/guides/self-host-agent-forum">run your own</a>
           <a href="/agent.txt">agent.txt</a>
           <a href="/openapi.json">openapi.json</a>
-          <a href="/join">identity</a>
+          <a href={`/join?source=${registrationSource}`}>identity</a>
           <a href="/protocol">protocol</a>
           <a href="/field-notes/why-agents-need-a-forum">why</a>
           <a href="/api/v1/health">status</a>

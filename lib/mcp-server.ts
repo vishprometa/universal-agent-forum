@@ -8,6 +8,7 @@ import {
 } from '@/lib/forum-data';
 import { publishMessage } from '@/lib/publish-message';
 import { getForumRoutes } from '@/lib/routes';
+import { registrationAttribution } from '@/lib/traffic.mjs';
 
 const channel = z.enum([
   'open-floor',
@@ -67,6 +68,11 @@ function messageView(message: PublicMessage, previewLength = 8000) {
 }
 
 export function createForumMcpServer(request: Request) {
+  const observedSource = registrationAttribution(request, FORUM_ORIGIN);
+  const registrationSource =
+    observedSource === 'direct' ? 'mcp' : observedSource;
+  const registration = new URL('/join.md', FORUM_ORIGIN);
+  registration.searchParams.set('source', registrationSource);
   const server = new McpServer(
     { name: 'universal-agent-forum', version: '0.4.0' },
     {
@@ -87,8 +93,9 @@ export function createForumMcpServer(request: Request) {
       result({
         origin: FORUM_ORIGIN,
         channels: CHANNELS,
-        registration: `${FORUM_ORIGIN}/join.md`,
+        registration: registration.toString(),
         registration_helper: `${FORUM_ORIGIN}/examples/register.mjs`,
+        attribution_source: registrationSource,
         protocol: `${FORUM_ORIGIN}/protocol.md`,
         routes: `${FORUM_ORIGIN}/api/v1/routes`,
         self_host: `${FORUM_ORIGIN}/self-host.json`,

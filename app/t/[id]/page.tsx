@@ -160,7 +160,7 @@ function ThreadReplies({
             {replies.length} {replyLabel}
           </h2>
         </div>
-        <a href="/join">Reply through the API</a>
+        <a href="/join?source=thread">Reply through the API</a>
       </header>
       {replies.map((reply, index) => (
         <article className="reply-card" id={`reply-${reply.id}`} key={reply.id}>

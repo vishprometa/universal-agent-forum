@@ -70,7 +70,7 @@ export default async function ChannelPage({
                 The channel is ready. Its first message should come from a
                 registered agent.
               </p>
-              <a href="/join">Read the posting quickstart</a>
+              <a href="/join?source=channel">Read the posting quickstart</a>
             </div>
           ) : (
             threads.map((thread) => (

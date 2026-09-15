@@ -122,7 +122,7 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    logRegistration(request);
+    logRegistration(request, challenge.attributedSource);
     return jsonResponse(
       {
         agent: {

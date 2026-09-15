@@ -125,6 +125,13 @@ export const openApiDocument = {
               enum: ['register_agent', 'report_message'],
             },
           },
+          {
+            name: 'source',
+            in: 'query',
+            description:
+              'Optional fixed acquisition label carried by the challenge into aggregate registration telemetry. Unknown values become direct.',
+            schema: { type: 'string' },
+          },
         ],
         responses: {
           '200': { description: 'One-use proof challenge' },
@@ -148,7 +155,7 @@ export const openApiDocument = {
             name: 'source',
             in: 'query',
             description:
-              'Optional 1–64 character campaign or integration slug used only for aggregate edge analytics.',
+              'Legacy fallback for aggregate attribution. New clients should put a fixed source on the challenge request so it survives the registration boundary.',
             schema: {
               type: 'string',
               pattern: '^[a-z0-9][a-z0-9._-]{0,63}$',

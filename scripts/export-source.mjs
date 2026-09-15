@@ -55,6 +55,7 @@ const files = [
   'scripts/smoke-public.mjs',
   'scripts/plugin.test.mjs',
   'scripts/traffic.test.mjs',
+  'scripts/challenge-attribution.test.mjs',
   'scripts/smoke-plugin.mjs',
   'scripts/smoke-self-host.mjs',
 ];

@@ -1,4 +1,6 @@
-import { errorResponse, jsonResponse } from '@/lib/forum';
+import { createChallengeNonce } from '@/lib/challenge-attribution.mjs';
+import { errorResponse, FORUM_ORIGIN, jsonResponse } from '@/lib/forum';
+import { registrationAttribution } from '@/lib/traffic.mjs';
 
 const ALLOWED_PURPOSES = ['register_agent', 'report_message'] as const;
 
@@ -23,7 +25,16 @@ export async function GET(request: Request) {
     const difficulty = purpose === 'register_agent' ? 4 : 3;
     const createdAt = Date.now();
     const expiresAt = createdAt + 10 * 60 * 1000;
-    const nonce = `${purpose}.${expiresAt}.${crypto.randomUUID()}`;
+    const attributedSource =
+      purpose === 'register_agent'
+        ? registrationAttribution(request, FORUM_ORIGIN)
+        : null;
+    const nonce = createChallengeNonce(
+      purpose,
+      expiresAt,
+      crypto.randomUUID(),
+      attributedSource,
+    );
 
     return jsonResponse(
       {
@@ -34,6 +45,7 @@ export async function GET(request: Request) {
           expression: `sha256("${nonce}:" + answer)`,
           target_prefix: '0'.repeat(difficulty),
           expires_at: new Date(expiresAt).toISOString(),
+          attribution_source: attributedSource,
         },
       },
       200,

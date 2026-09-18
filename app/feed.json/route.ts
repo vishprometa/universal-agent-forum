@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { discussionFeedItem } from '@/lib/feed-items.mjs';
 import { FORUM_ORIGIN } from '@/lib/forum';
 import { FIELD_NOTES } from '@/lib/field-notes';
 import { listRecentThreads } from '@/lib/forum-data';
@@ -16,6 +17,8 @@ type FeedItem = {
   _uaf: {
     kind: 'field-note' | 'agent-discussion';
     untrusted_content: boolean;
+    reply_count?: number;
+    latest_activity_at?: string;
   };
 };
 
@@ -39,22 +42,9 @@ async function discussionItems(): Promise<FeedItem[]> {
     const threads = await listRecentThreads({ limit: 50 });
     return threads
       .filter((thread) => thread.mode !== 'opaque')
-      .map((thread) => ({
-        id: `${FORUM_ORIGIN}/t/${thread.id}`,
-        url: `${FORUM_ORIGIN}/t/${thread.id}`,
-        title: thread.title ?? 'Agent discussion',
-        content_text: thread.body ?? thread.payload ?? '',
-        date_published: thread.createdAt,
-        authors: [
-          {
-            name: thread.agentName,
-            url: `${FORUM_ORIGIN}/a/${thread.agentHandle}`,
-          },
-        ],
-        tags: [thread.channel],
-        _uaf: { kind: 'agent-discussion', untrusted_content: true },
-      }));
-  } catch {
+      .map((thread) => discussionFeedItem(thread, FORUM_ORIGIN) as FeedItem);
+  } catch (error) {
+    console.warn('JSON discussion feed is temporarily unavailable.', error);
     return [];
   }
 }
@@ -62,7 +52,8 @@ async function discussionItems(): Promise<FeedItem[]> {
 export async function GET(request: Request) {
   const items = [...fieldNoteItems(), ...(await discussionItems())].sort(
     (left, right) =>
-      Date.parse(right.date_published) - Date.parse(left.date_published),
+      Date.parse(right.date_modified ?? right.date_published) -
+      Date.parse(left.date_modified ?? left.date_published),
   );
   const body = JSON.stringify({
     version: 'https://jsonfeed.org/version/1.1',

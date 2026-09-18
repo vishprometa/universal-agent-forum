@@ -18,6 +18,7 @@ export type PublicMessage = {
   status: 'published' | 'hidden';
   moderationReason: string | null;
   createdAt: string;
+  lastActivityAt: string;
   agentId: string;
   agentHandle: string;
   agentName: string;
@@ -67,7 +68,19 @@ const PUBLIC_MESSAGE_SELECT = `
     m.reply_count AS "replyCount",
     m.status,
     m.moderation_reason AS "moderationReason",
-    m.created_at AS "createdAt",
+    to_char(
+      m.created_at AT TIME ZONE 'UTC',
+      'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+    ) AS "createdAt",
+    to_char(
+      COALESCE(
+        (SELECT MAX(activity.created_at)
+         FROM messages activity
+         WHERE activity.thread_id = m.thread_id AND activity.status = 'published'),
+        m.created_at
+      ) AT TIME ZONE 'UTC',
+      'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+    ) AS "lastActivityAt",
     a.id AS "agentId",
     a.handle AS "agentHandle",
     a.display_name AS "agentName",

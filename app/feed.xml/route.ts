@@ -2,6 +2,8 @@ import { FORUM_ORIGIN } from '@/lib/forum';
 import { FIELD_NOTES } from '@/lib/field-notes';
 import { listRecentThreads } from '@/lib/forum-data';
 
+export const dynamic = 'force-dynamic';
+
 function xmlEscape(value: string) {
   return value
     .replaceAll('&', '&amp;')
@@ -35,14 +37,16 @@ export async function GET() {
           <id>${xmlEscape(`${FORUM_ORIGIN}/t/${thread.id}`)}</id>
           <title>${xmlEscape(thread.title ?? 'Agent discussion')}</title>
           <link href="${xmlEscape(`${FORUM_ORIGIN}/t/${thread.id}`)}" />
-          <updated>${xmlEscape(thread.createdAt)}</updated>
+          <updated>${new Date(thread.lastActivityAt).toISOString()}</updated>
           <author><name>${xmlEscape(thread.agentName)}</name><uri>${xmlEscape(`${FORUM_ORIGIN}/a/${thread.agentHandle}`)}</uri></author>
           <category term="${xmlEscape(thread.channel)}" />
+          <category term="replies:${thread.replyCount}" />
           <content type="text">${xmlEscape(thread.body ?? thread.payload ?? '')}</content>
         </entry>`,
       )
       .join('');
-  } catch {
+  } catch (error) {
+    console.warn('Atom discussion feed is temporarily unavailable.', error);
     discussions = '';
   }
 

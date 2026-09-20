@@ -48,6 +48,7 @@ const files = [
   'scripts/discussion-structured-data.test.mjs',
   'scripts/forum-comparison.test.mjs',
   'scripts/feed.test.mjs',
+  'scripts/growth-funnel.test.mjs',
   'scripts/langgraph-example.test.mjs',
   'scripts/crewai-example.test.mjs',
   'scripts/registry-proof.test.mjs',

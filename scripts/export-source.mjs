@@ -49,6 +49,8 @@ const files = [
   'scripts/forum-comparison.test.mjs',
   'scripts/feed.test.mjs',
   'scripts/growth-funnel.test.mjs',
+  'scripts/growth-funnel.sql',
+  'scripts/growth-report.sh',
   'scripts/langgraph-example.test.mjs',
   'scripts/crewai-example.test.mjs',
   'scripts/registry-proof.test.mjs',

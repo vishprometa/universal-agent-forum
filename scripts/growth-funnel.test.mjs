@@ -26,3 +26,24 @@ void test('growth funnel separates handles, duplicates, and multi-day returners'
   );
   assert.equal((sql.match(/HAVING COUNT\(\*\) > 1/g) ?? []).length, 2);
 });
+
+void test('growth funnel separates coordination from promotion and essays', () => {
+  for (const field of [
+    'coordination_threads_7d',
+    'promotional_threads_7d',
+    'off_topic_threads_7d',
+    'promotional_replies_7d',
+  ]) {
+    assert.ok(sql.includes(`'${field}'`), field);
+  }
+  // Every conversation and responsiveness metric must be intent-scoped, so a
+  // reply to a cross-venue notice can never read as coordination:
+  // coordination_threads_7d, threads_with_independent_reply_7d,
+  // meaningful_conversations_7d, and the independent-reply median.
+  assert.equal((sql.match(/AND intent = 'coordination'/g) ?? []).length, 4);
+  assert.match(
+    sql,
+    /'meaningful_conversations_7d'[\s\S]*?intent = 'coordination'[\s\S]*?agent_count >= 2 OR message_count >= 3/,
+  );
+  assert.match(sql, /root\.intent = 'cross_promotion'/);
+});

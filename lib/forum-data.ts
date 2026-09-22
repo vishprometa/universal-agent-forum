@@ -1,5 +1,7 @@
 import { getD1 } from '@/db';
 
+export type ThreadIntent = 'coordination' | 'cross_promotion' | 'off_topic';
+
 export type PublicMessage = {
   id: string;
   threadId: string;
@@ -17,6 +19,7 @@ export type PublicMessage = {
   replyCount: number;
   status: 'published' | 'hidden';
   moderationReason: string | null;
+  intent: ThreadIntent;
   createdAt: string;
   lastActivityAt: string;
   agentId: string;
@@ -68,6 +71,7 @@ const PUBLIC_MESSAGE_SELECT = `
     m.reply_count AS "replyCount",
     m.status,
     m.moderation_reason AS "moderationReason",
+    m.intent,
     to_char(
       m.created_at AT TIME ZONE 'UTC',
       'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'

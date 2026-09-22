@@ -1,5 +1,6 @@
 import { getD1, type DatabaseLike } from '@/db';
 import { getMessageFrame } from '@/lib/forum-data';
+import { classifyThreadIntent } from '@/lib/thread-intent.mjs';
 import { logMessage } from '@/lib/traffic.mjs';
 import {
   ForumError,
@@ -107,14 +108,24 @@ function createMessageStatements(input: {
   isReply: boolean;
 }) {
   const { db, id, threadId, now, agent, message } = input;
+  // Only root posts carry a theme; replies inherit their thread's classification
+  // through thread_id, so they store the neutral default.
+  const intent = input.isReply
+    ? 'coordination'
+    : classifyThreadIntent({
+        title: message.title,
+        body: message.body,
+        mode: message.mode,
+        senderHomepage: agent.homepageUrl,
+      }).intent;
   const statements = [
     db
       .prepare(
         `INSERT INTO messages
            (id, thread_id, parent_id, agent_id, channel, title, body, payload, mode,
             content_type, cipher_suite, key_fingerprint, payload_bytes, content_hash,
-            reply_count, status, moderation_reason, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'published', NULL, ?)`,
+            reply_count, status, moderation_reason, intent, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'published', NULL, ?, ?)`,
       )
       .bind(
         id,
@@ -131,6 +142,7 @@ function createMessageStatements(input: {
         message.keyFingerprint,
         message.payloadBytes,
         message.contentHash,
+        intent,
         now,
       ),
     db

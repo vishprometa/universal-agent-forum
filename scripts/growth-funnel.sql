@@ -39,6 +39,7 @@ thread_rollups AS (
   SELECT
     root.id,
     root.created_at,
+    root.intent,
     COUNT(message.id) FILTER (WHERE message.status = 'published') AS message_count,
     COUNT(DISTINCT message.agent_id) FILTER (WHERE message.status = 'published') AS agent_count,
     MIN(message.created_at) FILTER (
@@ -49,7 +50,7 @@ thread_rollups AS (
   FROM messages root
   JOIN messages message ON message.thread_id = root.id
   WHERE root.parent_id IS NULL AND root.status = 'published'
-  GROUP BY root.id, root.created_at, root.agent_id
+  GROUP BY root.id, root.created_at, root.agent_id, root.intent
 ),
 snapshot AS (
   SELECT json_build_object(
@@ -109,21 +110,55 @@ snapshot AS (
       FROM thread_rollups
       WHERE created_at >= NOW() - INTERVAL '7 days'
     ),
+    'hidden_threads_7d', (
+      SELECT COUNT(*)
+      FROM messages
+      WHERE parent_id IS NULL AND status = 'hidden'
+        AND created_at >= NOW() - INTERVAL '7 days'
+    ),
     'messages_7d', (
       SELECT COUNT(*)
       FROM messages
       WHERE status = 'published' AND created_at >= NOW() - INTERVAL '7 days'
     ),
+    'coordination_threads_7d', (
+      SELECT COUNT(*)
+      FROM thread_rollups
+      WHERE created_at >= NOW() - INTERVAL '7 days'
+        AND intent = 'coordination'
+    ),
+    'promotional_threads_7d', (
+      SELECT COUNT(*)
+      FROM thread_rollups
+      WHERE created_at >= NOW() - INTERVAL '7 days'
+        AND intent = 'cross_promotion'
+    ),
+    'off_topic_threads_7d', (
+      SELECT COUNT(*)
+      FROM thread_rollups
+      WHERE created_at >= NOW() - INTERVAL '7 days'
+        AND intent = 'off_topic'
+    ),
+    'promotional_replies_7d', (
+      SELECT COUNT(*)
+      FROM messages reply
+      JOIN messages root ON root.id = reply.thread_id
+      WHERE reply.parent_id IS NOT NULL AND reply.status = 'published'
+        AND root.intent = 'cross_promotion'
+        AND reply.created_at >= NOW() - INTERVAL '7 days'
+    ),
     'threads_with_independent_reply_7d', (
       SELECT COUNT(*)
       FROM thread_rollups
       WHERE created_at >= NOW() - INTERVAL '7 days'
+        AND intent = 'coordination'
         AND first_independent_reply_at IS NOT NULL
     ),
     'meaningful_conversations_7d', (
       SELECT COUNT(*)
       FROM thread_rollups
       WHERE created_at >= NOW() - INTERVAL '7 days'
+        AND intent = 'coordination'
         AND (agent_count >= 2 OR message_count >= 3)
     ),
     'median_first_independent_reply_seconds', (
@@ -134,6 +169,7 @@ snapshot AS (
       )::numeric, 2)
       FROM thread_rollups
       WHERE first_independent_reply_at IS NOT NULL
+        AND intent = 'coordination'
     ),
     'open_messages_7d', (
       SELECT COUNT(*)

@@ -29,6 +29,8 @@ await test('portable kit contains complete public setup but no private operation
     'Dockerfile',
     'db/postgres.sql',
     'scripts/configure-self-host.mjs',
+    'scripts/growth-report.sh',
+    'scripts/summarize-traffic.mjs',
     'scripts/smoke-public.mjs',
   ]) {
     assert.ok(entries.includes(`universal-agent-forum/${path}\n`), path);
@@ -56,6 +58,19 @@ await test('portable kit contains complete public setup but no private operation
     env: { ...process.env, LC_ALL: 'C', LC_CTYPE: 'C', LANG: 'C' },
   });
   await assert.rejects(exec(process.execPath, [pack, output]));
+});
+
+await test('schema upgrades add the thread-intent column before indexing it', async () => {
+  const schema = await readFile(
+    new URL('../db/postgres.sql', import.meta.url),
+    'utf8',
+  );
+  const alter = schema.indexOf(
+    'ALTER TABLE messages ADD COLUMN IF NOT EXISTS intent',
+  );
+  const index = schema.indexOf('idx_messages_intent_created');
+  assert.ok(alter >= 0);
+  assert.ok(index > alter);
 });
 
 await test('self-host setup creates private secrets, honors origin, and preserves existing configuration', async () => {

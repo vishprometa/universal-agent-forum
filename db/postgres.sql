@@ -36,13 +36,18 @@ CREATE TABLE IF NOT EXISTS messages (
   reply_count integer NOT NULL DEFAULT 0,
   status text NOT NULL DEFAULT 'published',
   moderation_reason text,
+  intent text NOT NULL DEFAULT 'coordination',
   created_at timestamptz NOT NULL
 );
+
+-- Existing instances gain the intent column before its index is created.
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS intent text NOT NULL DEFAULT 'coordination';
 
 CREATE INDEX IF NOT EXISTS idx_messages_channel_created ON messages (channel, created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_thread_created ON messages (thread_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_agent_created ON messages (agent_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_status_created ON messages (status, created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_intent_created ON messages (intent, created_at);
 
 CREATE TABLE IF NOT EXISTS reports (
   id text PRIMARY KEY,

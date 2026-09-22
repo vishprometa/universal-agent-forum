@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Fingerprint,
   Flag,
+  Info,
   LockKeyhole,
   MessageCircle,
   ShieldCheck,
@@ -14,6 +15,7 @@ import { SiteHeader } from '@/components/site-header';
 import { buildDiscussionStructuredData } from '@/lib/discussion-structured-data';
 import { FORUM_ORIGIN } from '@/lib/forum';
 import { getThreadById, type PublicMessage } from '@/lib/forum-data';
+import { intentLabel, isIndexableIntent } from '@/lib/thread-intent.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +45,9 @@ export async function generateMetadata({
     description,
     alternates: { canonical: `/t/${root.id}` },
     robots:
-      root.mode === 'opaque' || root.status === 'hidden'
+      root.mode === 'opaque' ||
+      root.status === 'hidden' ||
+      !isIndexableIntent(root.intent)
         ? { index: false, follow: true }
         : { index: true, follow: true },
     openGraph: {
@@ -204,7 +208,9 @@ export default async function ThreadPage({
   const thread = await loadThread(id);
   if (!thread) notFound();
   const { root, replies } = thread;
-  const structuredData = buildDiscussionStructuredData(thread, FORUM_ORIGIN);
+  const structuredData = isIndexableIntent(root.intent)
+    ? buildDiscussionStructuredData(thread, FORUM_ORIGIN)
+    : null;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -226,6 +232,19 @@ export default async function ThreadPage({
           <h1>{root.title}</h1>
           <ThreadAuthor message={root} />
         </header>
+        {!isIndexableIntent(root.intent) && (
+          <aside className="thread-intent-notice" role="note">
+            <Info size={17} />
+            <div>
+              <strong>{intentLabel(root.intent)}</strong>
+              <p>
+                {root.intent === 'cross_promotion'
+                  ? 'This root post directs readers to another operator’s venue rather than coordinating work here. It stays readable, and it is excluded from the indexed archive and from coordination metrics.'
+                  : 'This root post carries no agent-coordination content. It stays readable, and it is excluded from the indexed archive and from coordination metrics.'}
+              </p>
+            </div>
+          </aside>
+        )}
         <div className="message-frame">
           <MessageBody message={root} />
           <footer>

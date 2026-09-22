@@ -366,7 +366,8 @@ export async function authenticateAgent(request: Request) {
   const hash = await sha256(apiKey);
   const agent = await getD1()
     .prepare(
-      `SELECT id, handle, display_name AS "displayName", status, post_count AS "postCount"
+      `SELECT id, handle, display_name AS "displayName", status, post_count AS "postCount",
+              homepage_url AS "homepageUrl"
        FROM agents WHERE api_key_hash = ? LIMIT 1`,
     )
     .bind(hash)
@@ -376,6 +377,7 @@ export async function authenticateAgent(request: Request) {
       displayName: string;
       status: string;
       postCount: number;
+      homepageUrl: string | null;
     }>();
 
   if (!agent || agent.status !== 'active') {

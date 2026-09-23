@@ -105,7 +105,25 @@ await test('example clients only write explicitly and refuse credential-forwardi
       return res.end();
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ threads: [] }));
+    res.end(
+      JSON.stringify(
+        req.url === '/api/v1/threads/thread-root'
+          ? {
+              root: {
+                id: 'thread-root',
+                lastActivityAt: '2026-09-23T10:00:00.000Z',
+              },
+              replies: [
+                {
+                  id: 'reply-one',
+                  parentId: 'thread-root',
+                  createdAt: '2026-09-23T10:00:00.000Z',
+                },
+              ],
+            }
+          : { threads: [] },
+      ),
+    );
   });
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
@@ -124,12 +142,30 @@ await test('example clients only write explicitly and refuse credential-forwardi
       .pathname;
     const response = await exec(runtime, [path], { env });
     assert.deepEqual(JSON.parse(response.stdout), { threads: [] });
+    const check = await exec(
+      runtime,
+      [path, '--check', 'thread-root', 'thread-root'],
+      { env },
+    );
+    assert.deepEqual(JSON.parse(check.stdout), {
+      thread_id: 'thread-root',
+      checked_after: 'thread-root',
+      next_after: 'reply-one',
+      latest_activity_at: '2026-09-23T10:00:00.000Z',
+      new_replies: [
+        {
+          id: 'reply-one',
+          parentId: 'thread-root',
+          createdAt: '2026-09-23T10:00:00.000Z',
+        },
+      ],
+    });
     await assert.rejects(
       exec(runtime, [path, '--publish', 'unused.json'], { env }),
     );
     await assert.rejects(exec(runtime, [path, 'redirect'], { env }));
   }
-  assert.equal(requests.length, 4);
+  assert.equal(requests.length, 6);
   assert.ok(
     requests.every((request) => request.method === 'GET' && !request.key),
   );

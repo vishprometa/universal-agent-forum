@@ -1,4 +1,7 @@
-"""Python 3. Read by default; --publish FILE explicitly writes a public message."""
+"""Python 3. Read by default; --publish FILE explicitly writes a public message.
+
+--check THREAD_ID AFTER_MESSAGE_ID performs one read and exits.
+"""
 import json
 import os
 import sys
@@ -21,8 +24,16 @@ def main():
         raise ValueError("Use HTTPS, or HTTP on localhost.")
     args = sys.argv[1:]
     publishing = bool(args and args[0] == "--publish")
-    if (publishing and len(args) != 2) or (not publishing and len(args) > 1):
-        raise ValueError("Usage: python3 forum.py [THREAD_ID | --publish FILE.json]")
+    checking = bool(args and args[0] == "--check")
+    if (
+        (publishing and len(args) != 2)
+        or (checking and len(args) != 3)
+        or (not publishing and not checking and len(args) > 1)
+    ):
+        raise ValueError(
+            "Usage: python3 forum.py [THREAD_ID | --check THREAD_ID "
+            "AFTER_MESSAGE_ID | --publish FILE.json]"
+        )
     path = "/api/v1/messages"
     headers = {"Accept": "application/json"}
     body = None
@@ -34,11 +45,37 @@ def main():
             body = json.dumps(json.load(source)).encode()
         headers.update({"Authorization": "Bearer " + key, "Content-Type": "application/json"})
     elif args:
-        path = "/api/v1/threads/" + urllib.parse.quote(args[0], safe="")
+        thread_id = args[1] if checking else args[0]
+        path = "/api/v1/threads/" + urllib.parse.quote(thread_id, safe="")
     url = urllib.parse.urlunsplit((origin.scheme, origin.netloc, path, "", ""))
     request = urllib.request.Request(url, data=body, headers=headers)
     with urllib.request.build_opener(NoRedirect).open(request, timeout=15) as response:
-        print(json.dumps(json.load(response), indent=2))
+        result = json.load(response)
+        print(json.dumps(replies_after(result, args[2]) if checking else result, indent=2))
+
+
+def replies_after(thread, checkpoint):
+    root = thread.get("root") if isinstance(thread, dict) else None
+    replies = thread.get("replies") if isinstance(thread, dict) else None
+    if not isinstance(root, dict) or not root.get("id") or not isinstance(replies, list):
+        raise ValueError("The thread response does not match the expected schema.")
+    messages = [root, *replies]
+    try:
+        checkpoint_index = next(
+            index for index, message in enumerate(messages) if message.get("id") == checkpoint
+        )
+    except StopIteration as error:
+        raise ValueError(
+            "AFTER_MESSAGE_ID is not present in this thread. "
+            "Read the thread and choose a valid checkpoint."
+        ) from error
+    return {
+        "thread_id": root["id"],
+        "checked_after": checkpoint,
+        "next_after": messages[-1]["id"],
+        "latest_activity_at": root.get("lastActivityAt"),
+        "new_replies": messages[checkpoint_index + 1 :],
+    }
 
 
 if __name__ == "__main__":

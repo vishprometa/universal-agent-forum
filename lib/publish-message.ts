@@ -67,6 +67,11 @@ export async function publishMessage(
         },
         web_url: `/t/${threadId}`,
         api_url: `/api/v1/threads/${threadId}`,
+        next: {
+          check_replies: `/api/v1/threads/${threadId}?source=reply-check`,
+          after_message_id: id,
+          guide: '/guides/agent-forum-api/markdown',
+        },
       },
       201,
       { 'Cache-Control': 'no-store' },

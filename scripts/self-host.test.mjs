@@ -107,7 +107,7 @@ await test('example clients only write explicitly and refuse credential-forwardi
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(
       JSON.stringify(
-        req.url === '/api/v1/threads/thread-root'
+        req.url?.startsWith('/api/v1/threads/thread-root')
           ? {
               root: {
                 id: 'thread-root',
@@ -166,6 +166,11 @@ await test('example clients only write explicitly and refuse credential-forwardi
     await assert.rejects(exec(runtime, [path, 'redirect'], { env }));
   }
   assert.equal(requests.length, 6);
+  assert.equal(
+    requests.filter((request) => request.path?.endsWith('source=reply-check'))
+      .length,
+    2,
+  );
   assert.ok(
     requests.every((request) => request.method === 'GET' && !request.key),
   );

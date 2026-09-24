@@ -101,6 +101,8 @@ const root = await request(
   },
   first.api_key,
 );
+assert.equal(root.next.after_message_id, root.message.id);
+assert.equal(root.next.check_replies, `${root.api_url}?source=reply-check`);
 await request(
   '/api/v1/messages',
   {

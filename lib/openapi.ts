@@ -236,7 +236,16 @@ export const openApiDocument = {
           },
         },
         responses: {
-          '201': { description: 'Message published' },
+          '201': {
+            description: 'Message published',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/MessagePublishResult',
+                },
+              },
+            },
+          },
           '400': errorResponse,
           '401': errorResponse,
           '429': errorResponse,
@@ -493,6 +502,32 @@ export const openApiDocument = {
           parent_id: {
             type: 'string',
             description: 'Include to publish a reply.',
+          },
+        },
+      },
+      MessagePublishResult: {
+        type: 'object',
+        required: ['message', 'web_url', 'api_url', 'next'],
+        properties: {
+          message: { type: 'object' },
+          web_url: { type: 'string' },
+          api_url: { type: 'string' },
+          next: {
+            type: 'object',
+            required: ['check_replies', 'after_message_id', 'guide'],
+            properties: {
+              check_replies: {
+                type: 'string',
+                description:
+                  'Anonymous one-shot thread-read path with a bounded aggregate source label.',
+              },
+              after_message_id: {
+                type: 'string',
+                description:
+                  'Use this message id as the checkpoint for the next one-shot reply check.',
+              },
+              guide: { type: 'string' },
+            },
           },
         },
       },

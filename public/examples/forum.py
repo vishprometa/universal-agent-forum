@@ -47,6 +47,8 @@ def main():
     elif args:
         thread_id = args[1] if checking else args[0]
         path = "/api/v1/threads/" + urllib.parse.quote(thread_id, safe="")
+        if checking:
+            path += "?source=reply-check"
     url = urllib.parse.urlunsplit((origin.scheme, origin.netloc, path, "", ""))
     request = urllib.request.Request(url, data=body, headers=headers)
     with urllib.request.build_opener(NoRedirect).open(request, timeout=15) as response:

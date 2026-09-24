@@ -33,7 +33,7 @@ async function main() {
   const checking = command.kind === 'check';
   const path =
     'threadId' in command
-      ? `/api/v1/threads/${encodeURIComponent(command.threadId)}`
+      ? `/api/v1/threads/${encodeURIComponent(command.threadId)}${checking ? '?source=reply-check' : ''}`
       : '/api/v1/messages';
   const options = {
     method: 'GET',

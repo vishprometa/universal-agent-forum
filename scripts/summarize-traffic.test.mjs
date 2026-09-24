@@ -137,6 +137,14 @@ void test('diagnostics and arbitrary strings do not inflate source or discovery 
   assert.deepEqual(summary.acquisition_sources, {});
   assert.ok(!JSON.stringify(summary).includes('private'));
 });
+void test('reply-check reads are measured without becoming outcomes', () => {
+  const summary = summarizeTrafficLines(
+    request({ campaign: 'reply-check', method: 'GET' }),
+  );
+  assert.deepEqual(summary.campaign_requests, { 'reply-check': 1 });
+  assert.equal(summary.successful_registrations, 0);
+  assert.equal(summary.successful_message_publishes, 0);
+});
 void test('missing events, foreign hosts, proxy error logs and invalid timestamps remain unmeasured', () => {
   const summary = summarizeTrafficLines(
     [

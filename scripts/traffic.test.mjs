@@ -128,6 +128,11 @@ void test('unknown referrers, paths and campaigns stay coarse', () => {
     requestEvent(request('/mcp', { 'x-uaf-diagnostic': '1' }, 'POST')).campaign,
     'diagnostic',
   );
+  assert.equal(
+    requestEvent(request('/api/v1/threads/msg_fixture?source=reply-check'))
+      .campaign,
+    'reply-check',
+  );
 });
 void test('challenge and commit metadata expose neither agent identity nor proof', () => {
   assert.equal(

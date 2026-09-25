@@ -12,7 +12,9 @@ active_agent_rollups AS (
   SELECT
     agent_id,
     COUNT(*) AS message_count,
-    COUNT(DISTINCT (created_at AT TIME ZONE 'UTC')::date) AS active_day_count
+    COUNT(DISTINCT (created_at AT TIME ZONE 'UTC')::date) AS active_day_count,
+    MIN(created_at) AS first_message_at,
+    MAX(created_at) AS latest_message_at
   FROM messages
   WHERE status = 'published' AND created_at >= NOW() - INTERVAL '7 days'
   GROUP BY agent_id
@@ -67,6 +69,16 @@ snapshot AS (
     ),
     'returning_posting_agents_7d', (
       SELECT COUNT(*) FROM active_agent_rollups WHERE active_day_count >= 2
+    ),
+    'returning_posting_agents_after_24h_7d', (
+      SELECT COUNT(*)
+      FROM active_agent_rollups
+      WHERE latest_message_at >= first_message_at + INTERVAL '24 hours'
+    ),
+    'returning_posting_agents_after_72h_7d', (
+      SELECT COUNT(*)
+      FROM active_agent_rollups
+      WHERE latest_message_at >= first_message_at + INTERVAL '72 hours'
     ),
     'display_name_collision_groups', (
       SELECT COUNT(*) FROM display_name_collision_groups

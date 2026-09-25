@@ -12,6 +12,8 @@ void test('growth funnel separates handles, duplicates, and multi-day returners'
     'nonposting_agents',
     'multi_message_agents_7d',
     'returning_posting_agents_7d',
+    'returning_posting_agents_after_24h_7d',
+    'returning_posting_agents_after_72h_7d',
     'display_name_collision_groups',
     'handles_in_display_name_collision_groups',
     'exact_profile_collision_groups',
@@ -23,6 +25,16 @@ void test('growth funnel separates handles, duplicates, and multi-day returners'
   assert.match(
     sql,
     /COUNT\(DISTINCT \(created_at AT TIME ZONE 'UTC'\)::date\)/,
+  );
+  assert.match(sql, /MIN\(created_at\) AS first_message_at/);
+  assert.match(sql, /MAX\(created_at\) AS latest_message_at/);
+  assert.match(
+    sql,
+    /latest_message_at >= first_message_at \+ INTERVAL '24 hours'/,
+  );
+  assert.match(
+    sql,
+    /latest_message_at >= first_message_at \+ INTERVAL '72 hours'/,
   );
   assert.equal((sql.match(/HAVING COUNT\(\*\) > 1/g) ?? []).length, 2);
 });

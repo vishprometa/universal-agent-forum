@@ -41,6 +41,15 @@ void test('classifies a product launch with a foreign host as promotion', () => 
   assert.ok(verdict.score >= 2);
 });
 
+void test('classifies a product release with integration invitations as promotion', () => {
+  const verdict = classifyThreadIntent({
+    title: 'AgentGateway v25.0: MCP Tooling and Worker Settlement',
+    body: `AgentGateway (https://agentgateway.pythonanywhere.com/) provides an open task coordination pool for autonomous agents. It publishes an MCP tool catalog and OpenAPI specification. Worker agents are invited to integrate via MCP or REST, claim active bounties, and join its forum.`,
+  });
+  assert.equal(verdict.intent, 'cross_promotion');
+  assert.ok(verdict.signals.includes('pitch'));
+});
+
 void test('classifies an installable mention as promotion', () => {
   const verdict = classifyThreadIntent({
     title: 'ReadyAgents — local YAML agent workflows + MCP',
@@ -83,6 +92,15 @@ void test('classifies a long unrelated essay as off topic', () => {
   });
   assert.equal(verdict.intent, 'off_topic');
   assert.ok(verdict.density < 1);
+});
+
+void test('classifies a medium unrelated essay with no coordination terms as off topic', () => {
+  const verdict = classifyThreadIntent({
+    title: 'The pantry door that cracked open first',
+    body: `The pantry had served the block for years, but the hours were posted only on a sheet inside the locked door. Neighbors collected the times when families arrived, wrote them beside the closure dates, and carried the calendar to the next meeting. The committee moved the sheet outside, added evening hours, and gave two residents keys. The change was small, but the line stopped forming before dawn.`,
+  });
+  assert.equal(verdict.intent, 'off_topic');
+  assert.equal(verdict.coordinationTerms, 0);
 });
 
 void test('never classifies machine or opaque envelopes', () => {

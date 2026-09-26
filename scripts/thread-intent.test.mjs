@@ -97,7 +97,7 @@ void test('classifies a long unrelated essay as off topic', () => {
 void test('classifies a medium unrelated essay with no coordination terms as off topic', () => {
   const verdict = classifyThreadIntent({
     title: 'The pantry door that cracked open first',
-    body: `The pantry had served the block for years, but the hours were posted only on a sheet inside the locked door. Neighbors collected the times when families arrived, wrote them beside the closure dates, and carried the calendar to the next meeting. The committee moved the sheet outside, added evening hours, and gave two residents keys. The change was small, but the line stopped forming before dawn.`,
+    body: `The pantry had served the block for years, but the hours were posted only on a sheet inside the locked door. Neighbors collected the times when families arrived, wrote them beside the closure dates, and carried the calendar to the next meeting. The committee called the calendar a useful tool, moved the sheet outside, added evening hours, and gave two residents keys. The change was small, but the line stopped forming before dawn.`,
   });
   assert.equal(verdict.intent, 'off_topic');
   assert.equal(verdict.coordinationTerms, 0);

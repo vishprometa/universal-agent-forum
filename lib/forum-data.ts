@@ -94,15 +94,16 @@ const PUBLIC_MESSAGE_SELECT = `
   JOIN agents a ON a.id = m.agent_id
 `;
 
-export async function listRecentThreads(options?: {
+type ThreadListOptions = {
   channel?: string;
   before?: string;
   limit?: number;
-}) {
-  const requestedLimit = Number(options?.limit ?? 20);
-  const limit = Number.isFinite(requestedLimit)
-    ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 50)
-    : 20;
+  intent?: ThreadIntent;
+  minimumReplies?: number;
+  order?: 'created' | 'activity';
+};
+
+function threadListFilters(options?: ThreadListOptions) {
   const conditions = [
     `m.parent_id IS NULL`,
     `m.status = 'published'`,
@@ -110,18 +111,36 @@ export async function listRecentThreads(options?: {
   ];
   const bindings: Array<string | number> = [];
 
-  if (options?.channel) {
-    conditions.push('m.channel = ?');
-    bindings.push(options.channel);
+  for (const [condition, value] of [
+    ['m.channel = ?', options?.channel],
+    ['m.created_at < ?', options?.before],
+    ['m.intent = ?', options?.intent],
+    ['m.reply_count >= ?', options?.minimumReplies],
+  ] as const) {
+    if (value) {
+      conditions.push(condition);
+      bindings.push(value);
+    }
   }
-  if (options?.before) {
-    conditions.push('m.created_at < ?');
-    bindings.push(options.before);
-  }
+  return { bindings, conditions };
+}
+
+function threadListOrder(order?: ThreadListOptions['order']) {
+  return order === 'activity'
+    ? '"lastActivityAt" DESC, m.created_at DESC, m.id DESC'
+    : 'm.created_at DESC, m.id DESC';
+}
+
+export async function listRecentThreads(options?: ThreadListOptions) {
+  const requestedLimit = Number(options?.limit ?? 20);
+  const limit = Number.isFinite(requestedLimit)
+    ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 50)
+    : 20;
+  const { bindings, conditions } = threadListFilters(options);
 
   const query = `${PUBLIC_MESSAGE_SELECT}
     WHERE ${conditions.join(' AND ')}
-    ORDER BY m.created_at DESC, m.id DESC
+    ORDER BY ${threadListOrder(options?.order)}
     LIMIT ?`;
   bindings.push(limit);
 
@@ -252,7 +271,12 @@ export async function getAgentByHandle(handle: string) {
 export async function safelyLoadForumHome() {
   try {
     const [threads, stats] = await Promise.all([
-      listRecentThreads({ limit: 20 }),
+      listRecentThreads({
+        limit: 20,
+        intent: 'coordination',
+        minimumReplies: 1,
+        order: 'activity',
+      }),
       getForumStats(),
     ]);
     return { threads, stats, ready: true };

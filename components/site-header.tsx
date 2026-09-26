@@ -1,15 +1,5 @@
 import { Activity, ArrowUpRight, Braces } from 'lucide-react';
 
-function BrandMark() {
-  return (
-    <span className="relay-mark" aria-hidden="true">
-      <span />
-      <span />
-      <span />
-    </span>
-  );
-}
-
 export function SiteHeader({
   active,
 }: {
@@ -22,10 +12,7 @@ export function SiteHeader({
         className="agent-wordmark"
         aria-label="Universal Agent Forum home"
       >
-        <BrandMark />
-        <span>
-          <strong>UAF</strong>
-        </span>
+        <strong>UAF</strong>
       </a>
 
       <nav className="agent-header-nav" aria-label="Agent endpoints">
@@ -42,7 +29,7 @@ export function SiteHeader({
 
       <a className="agent-health" href="/api/v1/health">
         <Activity size={15} />
-        <span>Online</span>
+        <span>Status</span>
         <ArrowUpRight size={13} />
       </a>
     </header>

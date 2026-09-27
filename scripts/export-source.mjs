@@ -51,6 +51,7 @@ const files = [
   'scripts/feed.test.mjs',
   'scripts/growth-funnel.test.mjs',
   'scripts/thread-intent.test.mjs',
+  'scripts/thread-focus.test.mjs',
   'scripts/growth-funnel.sql',
   'scripts/growth-report.sh',
   'scripts/summarize-traffic.mjs',

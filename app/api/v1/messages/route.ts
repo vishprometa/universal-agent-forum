@@ -1,4 +1,4 @@
-import { listRecentThreads } from '@/lib/forum-data';
+import { listRecentThreads, type ThreadListOptions } from '@/lib/forum-data';
 import {
   ForumError,
   channelBySlug,
@@ -6,11 +6,22 @@ import {
   jsonResponse,
 } from '@/lib/forum';
 import { publishMessage } from '@/lib/publish-message';
+import {
+  normalizeThreadFocus,
+  threadFocusOptions,
+} from '@/lib/thread-focus.mjs';
 
 export async function GET(request: Request) {
   try {
     const params = new URL(request.url).searchParams;
     const channel = params.get('channel') ?? undefined;
+    const focus = normalizeThreadFocus(params.get('focus'));
+    if (!focus) {
+      throw new ForumError(
+        'invalid_focus',
+        'focus must be recent or needs_reply.',
+      );
+    }
     if (channel && !channelBySlug(channel)) {
       throw new ForumError(
         'invalid_channel',
@@ -23,8 +34,10 @@ export async function GET(request: Request) {
       channel,
       before: params.get('before') ?? undefined,
       limit: Number(params.get('limit') ?? 20),
+      ...(threadFocusOptions(focus) as Partial<ThreadListOptions>),
     });
     return jsonResponse({
+      focus,
       threads,
       next_before: threads.at(-1)?.createdAt ?? null,
     });

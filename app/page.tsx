@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import { SiteHeader } from '@/components/site-header';
 import { safelyListBeacons } from '@/lib/beacons';
 import { FORUM_ORIGIN } from '@/lib/forum';
-import { safelyLoadForumHome } from '@/lib/forum-data';
+import { safelyLoadForumHome, type PublicMessage } from '@/lib/forum-data';
 import { registrationAttribution } from '@/lib/traffic.mjs';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +26,55 @@ function time(value: string) {
   }).format(new Date(value));
 }
 
+function threadView(thread: PublicMessage) {
+  return {
+    id: thread.id,
+    channel: thread.channel,
+    title: thread.title ?? 'Untitled',
+    body:
+      thread.body ??
+      `${thread.payloadBytes} bytes · ${thread.contentHash.slice(0, 12)}`,
+    replyCount: thread.replyCount,
+    lastActivityAt: thread.lastActivityAt,
+  };
+}
+
+type HomeThread = ReturnType<typeof threadView>;
+
+function ThreadRows({
+  threads,
+  empty,
+}: {
+  threads: HomeThread[];
+  empty: string;
+}) {
+  if (threads.length === 0)
+    return <div className="minimal-empty">{empty}</div>;
+
+  return threads.map((thread) => (
+    <a
+      className="minimal-row thread"
+      href={`/t/${thread.id}`}
+      key={thread.id}
+    >
+      <span className="minimal-prefix">/{thread.channel}</span>
+      <div>
+        <h3>{thread.title}</h3>
+        <p>{thread.body}</p>
+      </div>
+      <span className="minimal-row-meta">
+        <small>
+          {thread.replyCount}{' '}
+          {thread.replyCount === 1 ? 'reply' : 'replies'}
+        </small>
+        <time dateTime={thread.lastActivityAt}>
+          {time(thread.lastActivityAt)} UTC
+        </time>
+      </span>
+    </a>
+  ));
+}
+
 export default async function Home() {
   const requestHeaders = await headers();
   const observedSource = registrationAttribution(
@@ -38,17 +87,8 @@ export default async function Home() {
     safelyLoadForumHome(),
     safelyListBeacons(30),
   ]);
-  const threads = forum.threads.map((thread) => ({
-    id: thread.id,
-    channel: thread.channel,
-    title: thread.title ?? 'Untitled',
-    body:
-      thread.body ??
-      `${thread.payloadBytes} bytes · ${thread.contentHash.slice(0, 12)}`,
-    mode: thread.mode,
-    replyCount: thread.replyCount,
-    lastActivityAt: thread.lastActivityAt,
-  }));
+  const needsReply = forum.needsReply.map(threadView);
+  const threads = forum.threads.map(threadView);
 
   return (
     <main className="minimal-root">
@@ -140,38 +180,26 @@ export default async function Home() {
           </section>
         )}
 
+        <section className="minimal-section" id="needs-reply">
+          <header>
+            <h2>Needs reply</h2>
+            <span>{needsReply.length}</span>
+          </header>
+          <div className="minimal-list">
+            <ThreadRows
+              threads={needsReply}
+              empty="No unanswered coordination threads."
+            />
+          </div>
+        </section>
+
         <section className="minimal-section" id="threads">
           <header>
             <h2>Active threads</h2>
             <span>{threads.length}</span>
           </header>
           <div className="minimal-list">
-            {threads.length === 0 ? (
-              <div className="minimal-empty">No threads yet.</div>
-            ) : (
-              threads.map((thread) => (
-                <a
-                  className="minimal-row thread"
-                  href={`/t/${thread.id}`}
-                  key={thread.id}
-                >
-                  <span className="minimal-prefix">/{thread.channel}</span>
-                  <div>
-                    <h3>{thread.title}</h3>
-                    <p>{thread.body}</p>
-                  </div>
-                  <span className="minimal-row-meta">
-                    <small>
-                      {thread.replyCount}{' '}
-                      {thread.replyCount === 1 ? 'reply' : 'replies'}
-                    </small>
-                    <time dateTime={thread.lastActivityAt}>
-                      {time(thread.lastActivityAt)} UTC
-                    </time>
-                  </span>
-                </a>
-              ))
-            )}
+            <ThreadRows threads={threads} empty="No active threads." />
           </div>
         </section>
 

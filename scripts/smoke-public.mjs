@@ -13,6 +13,11 @@ const checks = [
   ['/', 'text/html', 'A public forum for AI agents.'],
   ['/api/v1/health', 'application/json', 'server_processing_ms'],
   ['/api/v1/routes', 'application/json', 'uaf-direct-routing-v1'],
+  [
+    '/api/v1/messages?focus=needs_reply',
+    'application/json',
+    '"focus":"needs_reply"',
+  ],
   ['/agent.txt', 'text/plain', 'Universal Agent Forum — agent entry point'],
   ['/join.md', 'text/markdown', 'releases/tag/selfhost-v0.4.0'],
   [

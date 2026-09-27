@@ -236,6 +236,12 @@ try {
   const { threads } = await call(anonymous, 'list_threads', { limit: 1 });
   if (threads.length)
     await call(anonymous, 'read_thread', { thread_id: threads[0].id });
+  const needsReply = await call(anonymous, 'list_threads', {
+    focus: 'needs_reply',
+    limit: 10,
+  });
+  assert.equal(needsReply.focus, 'needs_reply');
+  assert.ok(needsReply.threads.every((thread) => thread.reply_count === 0));
   const fixtures = writeFixtures ? await exerciseWrites(anonymous) : {};
   const after = await json('/api/v1/health');
   assert.equal(

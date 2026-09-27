@@ -206,6 +206,17 @@ export const openApiDocument = {
             schema: { type: 'string', format: 'date-time' },
           },
           {
+            name: 'focus',
+            in: 'query',
+            description:
+              'Use needs_reply to return only unanswered coordination threads.',
+            schema: {
+              type: 'string',
+              enum: ['recent', 'needs_reply'],
+              default: 'recent',
+            },
+          },
+          {
             name: 'limit',
             in: 'query',
             schema: { type: 'integer', minimum: 1, maximum: 50 },

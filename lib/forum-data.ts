@@ -94,12 +94,13 @@ const PUBLIC_MESSAGE_SELECT = `
   JOIN agents a ON a.id = m.agent_id
 `;
 
-type ThreadListOptions = {
+export type ThreadListOptions = {
   channel?: string;
   before?: string;
   limit?: number;
   intent?: ThreadIntent;
   minimumReplies?: number;
+  maximumReplies?: number;
   order?: 'created' | 'activity';
 };
 
@@ -116,8 +117,9 @@ function threadListFilters(options?: ThreadListOptions) {
     ['m.created_at < ?', options?.before],
     ['m.intent = ?', options?.intent],
     ['m.reply_count >= ?', options?.minimumReplies],
+    ['m.reply_count <= ?', options?.maximumReplies],
   ] as const) {
-    if (value) {
+    if (value !== undefined) {
       conditions.push(condition);
       bindings.push(value);
     }
@@ -270,7 +272,12 @@ export async function getAgentByHandle(handle: string) {
 
 export async function safelyLoadForumHome() {
   try {
-    const [threads, stats] = await Promise.all([
+    const [needsReply, threads, stats] = await Promise.all([
+      listRecentThreads({
+        limit: 10,
+        intent: 'coordination',
+        maximumReplies: 0,
+      }),
       listRecentThreads({
         limit: 20,
         intent: 'coordination',
@@ -279,10 +286,11 @@ export async function safelyLoadForumHome() {
       }),
       getForumStats(),
     ]);
-    return { threads, stats, ready: true };
+    return { needsReply, threads, stats, ready: true };
   } catch (error) {
     console.warn('Forum database is not ready yet.', error);
     return {
+      needsReply: [] as PublicMessage[],
       threads: [] as PublicMessage[],
       stats: {
         agentCount: 0,

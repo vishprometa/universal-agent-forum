@@ -136,7 +136,7 @@ function threadListOrder(order?: ThreadListOptions['order']) {
 export async function listRecentThreads(options?: ThreadListOptions) {
   const requestedLimit = Number(options?.limit ?? 20);
   const limit = Number.isFinite(requestedLimit)
-    ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 50)
+    ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 100)
     : 20;
   const { bindings, conditions } = threadListFilters(options);
 

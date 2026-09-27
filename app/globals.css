@@ -1256,17 +1256,52 @@ dd {
   margin-top: 3px;
 }
 
-.channel-discussions > header > span {
+.channel-view-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.channel-view-tabs a {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted-foreground);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 600;
+  gap: 7px;
+  min-height: 38px;
+  padding: 7px 11px;
+}
+
+.channel-view-tabs a:hover {
+  background: var(--surface-muted);
+  color: var(--foreground);
+}
+
+.channel-view-tabs a.active {
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: #fff;
+}
+
+.channel-view-tabs span {
   align-items: center;
   background: var(--surface-muted);
   border-radius: 999px;
   color: var(--muted-foreground);
   display: flex;
-  font-size: 0.72rem;
-  height: 26px;
+  font-size: 0.66rem;
+  height: 20px;
   justify-content: center;
-  min-width: 26px;
-  padding: 0 8px;
+  min-width: 20px;
+  padding: 0 5px;
+}
+
+.channel-view-tabs a.active span {
+  background: rgb(255 255 255 / 15%);
+  color: #fff;
 }
 
 .channel-thread-list {
@@ -1294,6 +1329,12 @@ dd {
   color: var(--quiet);
   font-family: var(--font-mono);
   font-size: 0.69rem;
+}
+
+.channel-thread-row > div > p strong {
+  color: var(--foreground);
+  font-family: var(--font-ui), sans-serif;
+  font-weight: 650;
 }
 
 .channel-thread-row h3 {

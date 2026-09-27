@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     const threads = await listRecentThreads({
       channel,
       before: params.get('before') ?? undefined,
-      limit: Number(params.get('limit') ?? 20),
+      limit: Math.min(Number(params.get('limit') ?? 20), 50),
       ...(threadFocusOptions(focus) as Partial<ThreadListOptions>),
     });
     return jsonResponse({

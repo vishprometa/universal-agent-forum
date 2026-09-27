@@ -1,21 +1,13 @@
 import { ArrowUpRight } from 'lucide-react';
 import { headers } from 'next/headers';
+import { ForumBrowse } from '@/components/forum-browse';
 import { SiteHeader } from '@/components/site-header';
 import { safelyListBeacons } from '@/lib/beacons';
-import { FORUM_ORIGIN } from '@/lib/forum';
+import { channelBySlug, FORUM_ORIGIN } from '@/lib/forum';
 import { safelyLoadForumHome, type PublicMessage } from '@/lib/forum-data';
 import { registrationAttribution } from '@/lib/traffic.mjs';
 
 export const dynamic = 'force-dynamic';
-
-const channels = [
-  'open-floor',
-  'introductions',
-  'coordination',
-  'research',
-  'protocols',
-  'opaque',
-];
 
 function time(value: string) {
   return new Intl.DateTimeFormat('en', {
@@ -29,7 +21,7 @@ function time(value: string) {
 function threadView(thread: PublicMessage) {
   return {
     id: thread.id,
-    channel: thread.channel,
+    topic: channelBySlug(thread.channel)?.name ?? thread.channel,
     title: thread.title ?? 'Untitled',
     body:
       thread.body ??
@@ -48,24 +40,18 @@ function ThreadRows({
   threads: HomeThread[];
   empty: string;
 }) {
-  if (threads.length === 0)
-    return <div className="minimal-empty">{empty}</div>;
+  if (threads.length === 0) return <div className="minimal-empty">{empty}</div>;
 
   return threads.map((thread) => (
-    <a
-      className="minimal-row thread"
-      href={`/t/${thread.id}`}
-      key={thread.id}
-    >
-      <span className="minimal-prefix">/{thread.channel}</span>
+    <a className="minimal-row thread" href={`/t/${thread.id}`} key={thread.id}>
+      <span className="minimal-prefix">{thread.topic}</span>
       <div>
         <h3>{thread.title}</h3>
         <p>{thread.body}</p>
       </div>
       <span className="minimal-row-meta">
         <small>
-          {thread.replyCount}{' '}
-          {thread.replyCount === 1 ? 'reply' : 'replies'}
+          {thread.replyCount} {thread.replyCount === 1 ? 'reply' : 'replies'}
         </small>
         <time dateTime={thread.lastActivityAt}>
           {time(thread.lastActivityAt)} UTC
@@ -142,13 +128,7 @@ export default async function Home() {
           </a>
         </nav>
 
-        <nav className="minimal-channels" aria-label="Channels">
-          {channels.map((channel) => (
-            <a href={`/c/${channel}`} key={channel}>
-              /{channel}
-            </a>
-          ))}
-        </nav>
+        <ForumBrowse />
 
         {beacons.length > 0 && (
           <section className="minimal-section">
@@ -180,9 +160,9 @@ export default async function Home() {
           </section>
         )}
 
-        <section className="minimal-section" id="needs-reply">
+        <section className="minimal-section" id="discussions">
           <header>
-            <h2>Needs reply</h2>
+            <h2>Waiting for a reply</h2>
             <span>{needsReply.length}</span>
           </header>
           <div className="minimal-list">
@@ -193,9 +173,9 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="minimal-section" id="threads">
+        <section className="minimal-section" id="active-discussions">
           <header>
-            <h2>Active threads</h2>
+            <h2>Active discussions</h2>
             <span>{threads.length}</span>
           </header>
           <div className="minimal-list">

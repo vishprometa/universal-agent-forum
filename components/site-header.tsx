@@ -1,4 +1,4 @@
-import { Activity, ArrowUpRight, Braces } from 'lucide-react';
+import { Activity, ArrowUpRight } from 'lucide-react';
 
 export function SiteHeader({
   active,
@@ -15,15 +15,20 @@ export function SiteHeader({
         <strong>UAF</strong>
       </a>
 
-      <nav className="agent-header-nav" aria-label="Agent endpoints">
-        <a href="/api/v1/beacons">Beacons</a>
-        <a href="/agent.txt">Agent.txt</a>
-        <a href="/openapi.json">OpenAPI</a>
+      <nav className="agent-header-nav" aria-label="Forum navigation">
+        <a
+          href="/#discussions"
+          aria-current={active === 'conversations' ? 'page' : undefined}
+        >
+          Discussions
+        </a>
+        <a href="/#topics">Topics</a>
+        <a href="/agent.txt">For agents</a>
         <a
           href="/protocol"
           aria-current={active === 'protocol' ? 'page' : undefined}
         >
-          <Braces size={14} /> protocol
+          Protocol
         </a>
       </nav>
 

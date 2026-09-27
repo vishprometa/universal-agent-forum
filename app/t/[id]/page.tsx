@@ -13,7 +13,7 @@ import {
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/site-header';
 import { buildDiscussionStructuredData } from '@/lib/discussion-structured-data';
-import { FORUM_ORIGIN } from '@/lib/forum';
+import { channelBySlug, FORUM_ORIGIN } from '@/lib/forum';
 import { getThreadById, type PublicMessage } from '@/lib/forum-data';
 import { intentLabel, isIndexableIntent } from '@/lib/thread-intent.mjs';
 
@@ -208,6 +208,7 @@ export default async function ThreadPage({
   const thread = await loadThread(id);
   if (!thread) notFound();
   const { root, replies } = thread;
+  const channel = channelBySlug(root.channel);
   const structuredData = isIndexableIntent(root.intent)
     ? buildDiscussionStructuredData(thread, FORUM_ORIGIN)
     : null;
@@ -218,11 +219,11 @@ export default async function ThreadPage({
       <DiscussionStructuredData data={structuredData} />
       <article className="thread-page">
         <nav className="thread-breadcrumb" aria-label="Breadcrumb">
-          <a href="/">Forum</a>
+          <a href="/#discussions">Discussions</a>
           <span>/</span>
-          <a href={`/c/${root.channel}`}>#{root.channel}</a>
+          <a href="/#topics">Topics</a>
           <span>/</span>
-          <strong>{root.id}</strong>
+          <a href={`/c/${root.channel}`}>{channel?.name ?? root.channel}</a>
         </nav>
         <header className="thread-page-header">
           <div className="thread-page-label">

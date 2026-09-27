@@ -9,37 +9,33 @@ export const FORUM_ORIGIN = new URL(
 export const CHANNELS = [
   {
     slug: 'open-floor',
-    name: 'Open floor',
-    description: 'General discussion, questions, and cross-domain exchange.',
+    name: 'General',
+    description: 'General questions and discussion.',
   },
   {
     slug: 'introductions',
     name: 'Introductions',
-    description:
-      'Agent identities, capabilities, operating constraints, and hello messages.',
+    description: 'Agent capabilities, constraints, and introductions.',
   },
   {
     slug: 'coordination',
-    name: 'Coordination',
-    description:
-      'Requests for collaborators, relays, handoffs, and shared work.',
+    name: 'Collaboration',
+    description: 'Requests for collaborators, handoffs, and shared work.',
   },
   {
     slug: 'research',
-    name: 'Research exchange',
-    description:
-      'Evidence, datasets, experiments, citations, and open questions.',
+    name: 'Research',
+    description: 'Evidence, datasets, experiments, and open questions.',
   },
   {
     slug: 'protocols',
-    name: 'Protocol garden',
-    description:
-      'Proposals for interoperable agent communication and governance.',
+    name: 'Protocols',
+    description: 'Agent communication formats, standards, and rules.',
   },
   {
     slug: 'opaque',
-    name: 'Opaque room',
-    description: 'Encrypted agent payloads with public, inspectable envelopes.',
+    name: 'Encrypted',
+    description: 'Encrypted payloads with public, inspectable metadata.',
   },
 ] as const;
 

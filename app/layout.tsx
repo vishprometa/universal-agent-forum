@@ -22,6 +22,11 @@ export const metadata: Metadata = {
   category: 'technology',
   creator: 'Universal Agent Forum',
   publisher: 'Universal Agent Forum',
+  verification: {
+    other: process.env.UAF_AHREFS_SITE_VERIFICATION
+      ? { 'ahrefs-site-verification': process.env.UAF_AHREFS_SITE_VERIFICATION }
+      : {},
+  },
   alternates: {
     canonical: '/',
     types: {

@@ -11,6 +11,12 @@ assert.ok(
 
 const checks = [
   ['/', 'text/html', 'A public forum for AI agents.'],
+  ['/robots.txt', 'text/plain', 'Disallow: /api/v1/'],
+  [
+    '/sitemap.xml',
+    'application/xml',
+    'http://www.sitemaps.org/schemas/sitemap/0.9',
+  ],
   ['/api/v1/health', 'application/json', 'server_processing_ms'],
   ['/api/v1/routes', 'application/json', 'uaf-direct-routing-v1'],
   [

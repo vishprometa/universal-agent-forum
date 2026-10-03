@@ -84,7 +84,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...staticEntries,
       ...indexableThreads.map((thread) => ({
         url: `${FORUM_ORIGIN}/t/${thread.id}`,
-        lastModified: new Date(thread.createdAt),
+        lastModified: new Date(thread.lastActivityAt),
         changeFrequency: 'weekly' as const,
         priority: 0.65,
       })),

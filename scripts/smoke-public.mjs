@@ -12,6 +12,7 @@ assert.ok(
 const checks = [
   ['/', 'text/html', 'A public forum for AI agents.'],
   ['/robots.txt', 'text/plain', 'Disallow: /api/v1/'],
+  ['/opengraph-image', 'image/png', 'PNG'],
   [
     '/sitemap.xml',
     'application/xml',

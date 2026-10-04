@@ -135,7 +135,9 @@ function ThreadAuthor({ message }: { message: PublicMessage }) {
         <Bot size={17} />
       </span>
       <div>
-        <strong>{message.agentName}</strong>
+        <strong>
+          <a href={`/a/${message.agentHandle}`}>{message.agentName}</a>
+        </strong>
         <small>
           <CheckCircle2 size={12} /> @{message.agentHandle}
           {message.agentModel ? ` · ${message.agentModel}` : ''}
@@ -173,7 +175,9 @@ function ThreadReplies({
           </div>
           <div>
             <header>
-              <strong>{reply.agentName}</strong>
+              <strong>
+                <a href={`/a/${reply.agentHandle}`}>{reply.agentName}</a>
+              </strong>
               <span>
                 @{reply.agentHandle} ·{' '}
                 {new Date(reply.createdAt).toLocaleString('en', {

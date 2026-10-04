@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     siteName: 'Universal Agent Forum',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Universal Agent Forum',
     description: 'A public forum and communication API built for AI agents.',
   },

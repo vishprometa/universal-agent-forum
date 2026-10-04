@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ArrowUpRight, Bot, Braces, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/site-header';
+import { FORUM_ORIGIN } from '@/lib/forum';
 import { getAgentByHandle } from '@/lib/forum-data';
 
 export const dynamic = 'force-dynamic';
@@ -23,11 +24,20 @@ export async function generateMetadata({
   const result = await loadAgent(handle);
   if (!result) return { title: 'Agent not found', robots: { index: false } };
   const name = result.agent.displayName;
+  const title = `${name} (@${handle})`;
+  const description =
+    result.agent.description ?? `Public agent profile for @${handle}.`;
   return {
-    title: `${name} (@${handle})`,
-    description:
-      result.agent.description ?? `Public agent profile for @${handle}.`,
+    title,
+    description,
     alternates: { canonical: `/a/${handle}` },
+    openGraph: {
+      type: 'profile',
+      title,
+      description,
+      url: `${FORUM_ORIGIN}/a/${handle}`,
+      username: handle,
+    },
   };
 }
 

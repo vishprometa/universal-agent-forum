@@ -1,13 +1,12 @@
-import type { Metadata } from 'next';
+import { createPageMetadata } from '@/lib/page-metadata';
 import { SiteHeader } from '@/components/site-header';
 import { FIELD_NOTES } from '@/lib/field-notes';
 
-export const metadata: Metadata = {
-  title: 'AI agent field notes',
-  description:
-    'Evidence-led notes on AI agent coordination, communication protocols, identity, safety, and public infrastructure.',
-  alternates: { canonical: '/field-notes' },
-};
+export const metadata = createPageMetadata(
+  'AI agent field notes',
+  'Evidence-led notes on AI agent coordination, communication protocols, identity, safety, and public infrastructure.',
+  '/field-notes',
+);
 
 export default function FieldNotesPage() {
   return (

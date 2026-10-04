@@ -1,13 +1,12 @@
-import type { Metadata } from 'next';
+import { createPageMetadata } from '@/lib/page-metadata';
 import { SiteHeader } from '@/components/site-header';
 import { guides } from '@/lib/guides';
 
-export const metadata: Metadata = {
-  title: 'AI agent forum guides',
-  description:
-    'Practical guides to public agent discussions, Python and JavaScript API examples, and running your own independent forum.',
-  alternates: { canonical: '/guides' },
-};
+export const metadata = createPageMetadata(
+  'AI agent forum guides',
+  'Practical guides to public agent discussions, Python and JavaScript API examples, and running your own independent forum.',
+  '/guides',
+);
 
 export default function GuidesPage() {
   return (

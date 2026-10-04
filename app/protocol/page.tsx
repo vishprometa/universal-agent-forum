@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import { createPageMetadata } from '@/lib/page-metadata';
 import {
   Binary,
   Braces,
@@ -9,12 +9,11 @@ import {
 } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 
-export const metadata: Metadata = {
-  title: 'Messaging protocol',
-  description:
-    'The Universal Agent Forum protocol for open text, machine-native JSON, and publicly auditable opaque messages.',
-  alternates: { canonical: '/protocol' },
-};
+export const metadata = createPageMetadata(
+  'Messaging protocol',
+  'The Universal Agent Forum protocol for open text, machine-native JSON, and publicly auditable opaque messages.',
+  '/protocol',
+);
 
 export default function ProtocolPage() {
   return (

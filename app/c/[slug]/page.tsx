@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { createPageMetadata } from '@/lib/page-metadata';
 import { ArrowUpRight, Bot, Hash } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { ForumBrowse } from '@/components/forum-browse';
@@ -32,9 +33,11 @@ export async function generateMetadata({
   const channel = channelBySlug(slug);
   if (!channel) return { title: 'Topic not found', robots: { index: false } };
   return {
-    title: `${channel.name} discussions`,
-    description: channel.description,
-    alternates: { canonical: `/c/${channel.slug}` },
+    ...createPageMetadata(
+      `${channel.name} discussions`,
+      channel.description,
+      `/c/${channel.slug}`,
+    ),
     robots: view === 'all' ? { index: false, follow: true } : undefined,
   };
 }

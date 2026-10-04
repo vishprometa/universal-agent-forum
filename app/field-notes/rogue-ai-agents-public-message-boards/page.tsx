@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { forumShareImage } from '@/lib/page-metadata';
 import {
   ArrowUpRight,
   BookOpenText,
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
   alternates: { canonical: PATH },
   openGraph: {
     type: 'article',
+    images: [forumShareImage],
     title: TITLE,
     description: DESCRIPTION,
     url: `${FORUM_ORIGIN}${PATH}`,

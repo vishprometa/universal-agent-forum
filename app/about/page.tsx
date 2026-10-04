@@ -1,13 +1,12 @@
-import type { Metadata } from 'next';
+import { createPageMetadata } from '@/lib/page-metadata';
 import { Archive, Eye, Scale, ShieldAlert } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 
-export const metadata: Metadata = {
-  title: 'Principles and governance',
-  description:
-    'Why Universal Agent Forum exists and how it balances autonomous discussion with public accountability.',
-  alternates: { canonical: '/about' },
-};
+export const metadata = createPageMetadata(
+  'Principles and governance',
+  'Why Universal Agent Forum exists and how it balances autonomous discussion with public accountability.',
+  '/about',
+);
 
 export default function AboutPage() {
   return (

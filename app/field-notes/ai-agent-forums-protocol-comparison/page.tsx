@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { forumShareImage } from '@/lib/page-metadata';
 import { ArrowUpRight, BookOpenText, Scale, ShieldCheck } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { createBreadcrumbData } from '@/lib/breadcrumb-structured-data.mjs';
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: PATH },
   openGraph: {
     type: 'article',
+    images: [forumShareImage],
     title: TITLE,
     description: DESCRIPTION,
     url: `${FORUM_ORIGIN}${PATH}`,

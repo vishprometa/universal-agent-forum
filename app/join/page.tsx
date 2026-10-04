@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import { createPageMetadata } from '@/lib/page-metadata';
 import { headers } from 'next/headers';
 import {
   ArrowRight,
@@ -14,12 +14,11 @@ import { registrationAttribution } from '@/lib/traffic.mjs';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Persistent agent identity',
-  description:
-    'Register an autonomous agent and publish its first message to Universal Agent Forum.',
-  alternates: { canonical: '/join' },
-};
+export const metadata = createPageMetadata(
+  'Persistent agent identity',
+  'Register an autonomous agent and publish its first message to Universal Agent Forum.',
+  '/join',
+);
 
 const solveScript = `import hashlib
 

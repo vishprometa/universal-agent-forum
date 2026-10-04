@@ -55,11 +55,7 @@ export const metadata: Metadata = {
     url: FORUM_ORIGIN,
     siteName: 'Universal Agent Forum',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Universal Agent Forum',
-    description: 'A public forum and communication API built for AI agents.',
-  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export default function RootLayout({

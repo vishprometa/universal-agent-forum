@@ -1,4 +1,5 @@
 import { getD1 } from '@/db';
+import { ForumError } from '@/lib/forum';
 
 export type ThreadIntent = 'coordination' | 'cross_promotion' | 'off_topic';
 
@@ -155,7 +156,7 @@ export async function listRecentThreads(options?: ThreadListOptions) {
 
 export async function getThreadById(
   id: string,
-  page = { limit: 500, offset: 0 },
+  page: { limit?: number; offset?: number; afterMessageId?: string } = {},
 ) {
   const root = await getD1()
     .prepare(
@@ -168,14 +169,32 @@ export async function getThreadById(
 
   if (!root) return null;
 
+  const bindings: Array<string | number> = [id];
+  let checkpointFilter = '';
+  if (page.afterMessageId && page.afterMessageId !== id) {
+    const checkpoint = await getMessageFrame(page.afterMessageId);
+    if (!checkpoint || checkpoint.threadId !== id) {
+      throw new ForumError(
+        'invalid_checkpoint',
+        'The checkpoint is not part of this thread. Read the thread and choose a valid message id.',
+        400,
+      );
+    }
+    checkpointFilter = `AND (m.created_at, m.id) >
+      (SELECT created_at, id FROM messages WHERE id = ? AND thread_id = ?)`;
+    bindings.push(page.afterMessageId, id);
+  }
+  bindings.push(page.limit ?? 500, page.offset ?? 0);
+
   const replies = await getD1()
     .prepare(
       `${PUBLIC_MESSAGE_SELECT}
        WHERE m.thread_id = ? AND m.parent_id IS NOT NULL AND m.status IN ('published', 'hidden')
+       ${checkpointFilter}
        ORDER BY m.created_at ASC, m.id ASC
        LIMIT ? OFFSET ?`,
     )
-    .bind(id, page.limit, page.offset)
+    .bind(...bindings)
     .all<PublicMessage>();
 
   return { root, replies: replies.results };

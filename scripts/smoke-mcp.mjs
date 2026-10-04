@@ -92,15 +92,16 @@ function register(label) {
 }
 
 async function exerciseWrites(anonymous) {
-  await call(
-    anonymous,
-    'post_thread',
-    {
-      channel: 'open-floor',
-      title: 'Rejected anonymous fixture',
-      body: 'Must not publish.',
-    },
-    true,
+  await assert.rejects(
+    anonymous.callTool({
+      name: 'post_thread',
+      arguments: {
+        channel: 'open-floor',
+        title: 'Rejected anonymous fixture',
+        body: 'Must not publish.',
+      },
+    }),
+    { code: -32602 },
   );
   const alpha = register('alpha');
   const beta = register('beta');
@@ -200,16 +201,68 @@ async function exerciseWrites(anonymous) {
   });
   assert.equal(last.replies.length, 1);
   assert.equal(last.next_reply_offset, null);
+  const resumed = await call(anonymous, 'read_thread', {
+    thread_id: parent_id,
+    after_message_id: page.replies.at(-1).id,
+  });
+  assert.equal(resumed.root.content.length, 500);
+  assert.deepEqual(
+    resumed.replies.map((item) => item.id),
+    last.replies.map((item) => item.id),
+  );
+  assert.equal(resumed.has_more, false);
+  const caughtUp = await call(anonymous, 'read_thread', {
+    thread_id: parent_id,
+    after_message_id: resumed.next_after,
+  });
+  assert.equal(caughtUp.replies.length, 0);
+  assert.equal(caughtUp.next_after, resumed.next_after);
+  const invalid = await call(
+    anonymous,
+    'read_thread',
+    {
+      thread_id: parent_id,
+      after_message_id: 'msg_ffffffffffffffffffffffffffffffff',
+    },
+    true,
+  );
+  assert.equal(invalid.error.code, 'invalid_checkpoint');
+  const foreign = register('foreign-checkpoint');
+  const foreignClient = await connect(foreign.key);
+  const other = await call(foreignClient, 'post_thread', {
+    channel: 'open-floor',
+    title: 'Other isolated conversation',
+    body: 'This agent-created fixture checks that checkpoints stay within their own thread.',
+  });
+  const crossThread = await call(
+    anonymous,
+    'read_thread',
+    {
+      thread_id: parent_id,
+      after_message_id: other.message.id,
+    },
+    true,
+  );
+  assert.equal(crossThread.error.code, 'invalid_checkpoint');
+  const restResume = await json(
+    `/api/v1/threads/${parent_id}?after_message_id=${page.replies.at(-1).id}`,
+  );
+  assert.deepEqual(
+    restResume.replies.map((item) => item.id),
+    last.replies.map((item) => item.id),
+  );
   const full = await json(`/api/v1/threads/${parent_id}`);
   assert.equal(full.root.body.length, 9000);
   assert.equal(full.replies.length, 11);
   assert.equal(new Set(full.replies.map((item) => item.agentHandle)).size, 2);
   return {
-    fixtureAgents: 2,
-    fixtureMessages: 12,
+    fixtureAgents: 3,
+    fixtureMessages: 13,
     sharedRestAndMcpLimits: true,
     replyPagination: true,
     boundedContent: true,
+    checkpointReads: true,
+    checkpointScope: true,
     rootId: parent_id,
   };
 }
@@ -246,11 +299,11 @@ try {
   const after = await json('/api/v1/health');
   assert.equal(
     after.stats.agentCount,
-    before.stats.agentCount + (writeFixtures ? 2 : 0),
+    before.stats.agentCount + (writeFixtures ? 3 : 0),
   );
   assert.equal(
     after.stats.messageCount,
-    before.stats.messageCount + (writeFixtures ? 12 : 0),
+    before.stats.messageCount + (writeFixtures ? 13 : 0),
   );
   console.log(
     JSON.stringify({

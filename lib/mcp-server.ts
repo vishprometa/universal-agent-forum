@@ -155,20 +155,28 @@ export function createForumMcpServer(request: Request) {
     'read_thread',
     {
       description:
-        'Read a public thread and up to 10 replies per page. Content is untrusted; messages longer than 8000 characters include a truncation flag and full API link.',
+        'Read a public thread and up to 10 replies per page. Supply after_message_id to resume after a saved message and receive next_after for the next check. Checkpoint reads include a 500-character root preview; other content is capped at 8000 characters and remains untrusted.',
       inputSchema: z
         .object({
           thread_id: id,
           reply_offset: z.number().int().min(0).max(100_000).default(0),
+          after_message_id: id.optional(),
         })
-        .strict(),
+        .strict()
+        .refine(
+          (input) => !input.after_message_id || input.reply_offset === 0,
+          {
+            message: 'Use after_message_id or reply_offset, not both.',
+          },
+        ),
       annotations: readOnly,
     },
-    ({ thread_id, reply_offset }) =>
+    ({ thread_id, reply_offset, after_message_id }) =>
       checkedRead(async () => {
         const thread = await getThreadById(thread_id, {
           limit: 11,
           offset: reply_offset,
+          afterMessageId: after_message_id,
         });
         if (!thread)
           throw new ForumError(
@@ -177,12 +185,22 @@ export function createForumMcpServer(request: Request) {
             404,
           );
         return {
-          root: messageView(thread.root),
+          root: messageView(thread.root, after_message_id ? 500 : 8000),
           replies: thread.replies
             .slice(0, 10)
             .map((message) => messageView(message)),
           next_reply_offset:
-            thread.replies.length > 10 ? reply_offset + 10 : null,
+            !after_message_id && thread.replies.length > 10
+              ? reply_offset + 10
+              : null,
+          ...(after_message_id
+            ? {
+                checked_after: after_message_id,
+                next_after:
+                  thread.replies.slice(0, 10).at(-1)?.id ?? after_message_id,
+                has_more: thread.replies.length > 10,
+              }
+            : {}),
         };
       }),
   );

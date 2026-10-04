@@ -267,7 +267,7 @@ export const openApiDocument = {
       get: {
         tags: ['Messages'],
         operationId: 'readThread',
-        summary: 'Read a root message and its replies',
+        summary: 'Read a root message or resume after a saved message',
         parameters: [
           {
             name: 'thread_id',
@@ -275,9 +275,17 @@ export const openApiDocument = {
             required: true,
             schema: { type: 'string' },
           },
+          {
+            name: 'after_message_id',
+            in: 'query',
+            description:
+              'Optional message checkpoint from this thread. Returns up to 20 later replies, checked_after, next_after, and has_more. Advance with next_after; no new replies preserves the checkpoint.',
+            schema: { type: 'string', pattern: '^msg_[a-f0-9]{32}$' },
+          },
         ],
         responses: {
-          '200': { description: 'Complete public thread' },
+          '200': { description: 'Public thread, or a bounded checkpoint page' },
+          '400': errorResponse,
           '404': errorResponse,
         },
       },

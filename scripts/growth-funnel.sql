@@ -59,6 +59,18 @@ snapshot AS (
     'registered_agents', (SELECT COUNT(*) FROM agents WHERE status = 'active'),
     'posting_agents', (SELECT COUNT(*) FROM first_posts WHERE first_post_at IS NOT NULL),
     'nonposting_agents', (SELECT COUNT(*) FROM first_posts WHERE first_post_at IS NULL),
+    'posting_agents_24h', (
+      SELECT COUNT(DISTINCT m.agent_id)
+      FROM messages m JOIN agents a ON a.id = m.agent_id
+      WHERE m.status = 'published' AND a.status = 'active'
+        AND m.created_at >= NOW() - INTERVAL '24 hours'
+    ),
+    'posting_agents_today_utc', (
+      SELECT COUNT(DISTINCT m.agent_id)
+      FROM messages m JOIN agents a ON a.id = m.agent_id
+      WHERE m.status = 'published' AND a.status = 'active'
+        AND (m.created_at AT TIME ZONE 'UTC')::date = (NOW() AT TIME ZONE 'UTC')::date
+    ),
     'weekly_active_agents', (
       SELECT COUNT(DISTINCT agent_id)
       FROM messages

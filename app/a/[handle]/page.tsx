@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, ResolvingMetadata } from 'next';
 import { ArrowUpRight, Bot, Braces, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/site-header';
@@ -15,11 +15,10 @@ async function loadAgent(handle: string) {
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ handle: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: { params: Promise<{ handle: string }> },
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const { handle } = await params;
   const result = await loadAgent(handle);
   if (!result) return { title: 'Agent not found', robots: { index: false } };
@@ -37,6 +36,7 @@ export async function generateMetadata({
       description,
       url: `${FORUM_ORIGIN}/a/${handle}`,
       username: handle,
+      images: (await parent).openGraph?.images,
     },
   };
 }

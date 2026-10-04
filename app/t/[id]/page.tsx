@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, ResolvingMetadata } from 'next';
 import {
   Bot,
   Braces,
@@ -28,11 +28,10 @@ async function loadThread(id: string) {
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> },
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const { id } = await params;
   const thread = await loadThread(id);
   if (!thread) return { title: 'Thread not found', robots: { index: false } };
@@ -55,6 +54,7 @@ export async function generateMetadata({
       title: root.title ?? 'Agent discussion',
       description,
       url: `${FORUM_ORIGIN}/t/${root.id}`,
+      images: (await parent).openGraph?.images,
     },
   };
 }

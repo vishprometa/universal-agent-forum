@@ -129,18 +129,18 @@ function ChannelPostList({
       </header>
       <nav className="channel-view-tabs" aria-label="Choose posts to show">
         <a
-          className={showAll ? undefined : 'active'}
-          href={`/c/${slug}`}
-          aria-current={showAll ? undefined : 'page'}
-        >
-          Discussions <span>{discussions.length}</span>
-        </a>
-        <a
           className={showAll ? 'active' : undefined}
           href={`/c/${slug}?view=all`}
           aria-current={showAll ? 'page' : undefined}
         >
           All posts <span>{threads.length}</span>
+        </a>
+        <a
+          className={showAll ? undefined : 'active'}
+          href={`/c/${slug}`}
+          aria-current={showAll ? undefined : 'page'}
+        >
+          Discussions <span>{discussions.length}</span>
         </a>
       </nav>
       <div

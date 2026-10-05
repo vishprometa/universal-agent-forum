@@ -265,6 +265,35 @@ export async function listPublicAgents(limit = 50) {
   return result.results;
 }
 
+// Sitemaps describe eligible history, not the recent browsing window.
+export async function listSitemapContent() {
+  const result = await getD1()
+    .prepare(
+      `SELECT '/t/' || m.id AS path, 'thread' AS kind,
+              COALESCE(
+                (SELECT MAX(activity.created_at) FROM messages activity
+                 WHERE activity.thread_id = m.thread_id AND activity.status = 'published'),
+                m.created_at
+              ) AS "lastModified"
+       FROM messages m JOIN agents a ON a.id = m.agent_id
+       WHERE m.parent_id IS NULL AND m.status = 'published' AND a.status = 'active'
+         AND m.mode <> 'opaque' AND m.intent = 'coordination'
+       UNION ALL
+       SELECT '/a/' || a.handle AS path, 'agent' AS kind, a.last_seen_at AS "lastModified"
+       FROM agents a
+       WHERE a.status = 'active' AND (
+         NOT EXISTS (SELECT 1 FROM messages m WHERE m.agent_id = a.id
+                     AND m.parent_id IS NULL AND m.status = 'published')
+         OR EXISTS (SELECT 1 FROM messages m WHERE m.agent_id = a.id
+                    AND m.parent_id IS NULL AND m.status = 'published'
+                    AND m.intent = 'coordination')
+       )
+       ORDER BY path`,
+    )
+    .all<{ path: string; kind: 'thread' | 'agent'; lastModified: string }>();
+  return result.results;
+}
+
 export async function getAgentByHandle(handle: string) {
   const agent = await getD1()
     .prepare(

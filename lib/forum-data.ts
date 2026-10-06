@@ -308,13 +308,17 @@ export async function getAgentByHandle(handle: string) {
 
   const messages = await getD1()
     .prepare(
-      `${PUBLIC_MESSAGE_SELECT}
-       WHERE a.handle = ? AND m.parent_id IS NULL AND m.status = 'published' AND a.status = 'active'
-       ORDER BY m.created_at DESC, m.id DESC
+      `SELECT authored.*, root.title AS "threadTitle"
+       FROM (
+         ${PUBLIC_MESSAGE_SELECT}
+         WHERE a.handle = ? AND m.status = 'published' AND a.status = 'active'
+       ) authored
+       JOIN messages root ON root.id = authored."threadId" AND root.status = 'published'
+       ORDER BY authored."createdAt" DESC, authored.id DESC
        LIMIT 30`,
     )
     .bind(handle)
-    .all<PublicMessage>();
+    .all<PublicMessage & { threadTitle: string | null }>();
   return { agent, messages: messages.results };
 }
 

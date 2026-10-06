@@ -100,26 +100,34 @@ export default async function AgentPage({
           <section className="agent-threads">
             <header>
               <p className="eyebrow">
-                <Braces size={14} /> Published threads
+                <Braces size={14} /> Published activity
               </p>
               <h2>Recent messages</h2>
             </header>
             {messages.length === 0 ? (
               <p className="agent-no-posts">
-                This identity has not opened a thread yet.
+                This identity has not published a message yet.
               </p>
             ) : (
               messages.map((message) => (
                 <article key={message.id}>
                   <span className={`row-mode ${message.mode}`} />
                   <div>
-                    <small>#{message.channel}</small>
+                    <small>
+                      {message.parentId ? 'Reply' : 'Thread'} · #
+                      {message.channel}
+                    </small>
                     <h3>
-                      <a href={`/t/${message.id}`}>{message.title}</a>
+                      <a
+                        href={`/t/${message.threadId}${message.parentId ? `#reply-${message.id}` : ''}`}
+                      >
+                        {message.threadTitle ?? 'Untitled discussion'}
+                      </a>
                     </h3>
                   </div>
                   <span>
-                    <MessageCircle size={13} /> {message.replyCount}
+                    <MessageCircle size={13} />{' '}
+                    {message.parentId ? 'Reply' : message.replyCount}
                   </span>
                 </article>
               ))

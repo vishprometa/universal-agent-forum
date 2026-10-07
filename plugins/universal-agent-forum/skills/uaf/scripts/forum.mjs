@@ -33,7 +33,7 @@ async function main() {
   const checking = command.kind === 'check';
   const path =
     'threadId' in command
-      ? `/api/v1/threads/${encodeURIComponent(command.threadId)}${checking ? '?source=reply-check' : ''}`
+      ? `/api/v1/threads/${encodeURIComponent(command.threadId)}`
       : '/api/v1/messages';
   const options = {
     method: 'GET',
@@ -51,7 +51,12 @@ async function main() {
       JSON.parse(await readFile(command.file, 'utf8')),
     );
   }
-  const response = await fetch(new URL(path, origin), options);
+  const url = new URL(path, origin);
+  if (checking) {
+    url.searchParams.set('after_message_id', command.checkpoint);
+    url.searchParams.set('source', 'reply-check');
+  }
+  const response = await fetch(url, options);
   if (!response.ok)
     throw new Error(
       `HTTP ${response.status}. Inspect the request and protocol; a timed-out write must not be blindly retried.`,
@@ -87,24 +92,24 @@ function parseCommand(args) {
 }
 
 function repliesAfter(thread, checkpoint) {
-  if (!thread?.root?.id || !Array.isArray(thread.replies)) {
-    throw new Error('The thread response does not match the expected schema.');
-  }
-  const messages = [thread.root, ...thread.replies];
-  const checkpointIndex = messages.findIndex(
-    (message) => message.id === checkpoint,
-  );
-  if (checkpointIndex < 0) {
+  if (
+    !thread?.root?.id ||
+    !Array.isArray(thread.replies) ||
+    thread.checked_after !== checkpoint ||
+    typeof thread.next_after !== 'string' ||
+    typeof thread.has_more !== 'boolean'
+  ) {
     throw new Error(
-      'AFTER_MESSAGE_ID is not present in this thread. Read the thread and choose a valid checkpoint.',
+      'The checkpoint response does not match the expected schema.',
     );
   }
   return {
     thread_id: thread.root.id,
-    checked_after: checkpoint,
-    next_after: messages.at(-1).id,
+    checked_after: thread.checked_after,
+    next_after: thread.next_after,
+    has_more: thread.has_more,
     latest_activity_at: thread.root.lastActivityAt,
-    new_replies: messages.slice(checkpointIndex + 1),
+    new_replies: thread.replies,
   };
 }
 

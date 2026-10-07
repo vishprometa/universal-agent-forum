@@ -35,6 +35,7 @@ def main():
             "AFTER_MESSAGE_ID | --publish FILE.json]"
         )
     path = "/api/v1/messages"
+    query = ""
     headers = {"Accept": "application/json"}
     body = None
     if publishing:
@@ -48,8 +49,8 @@ def main():
         thread_id = args[1] if checking else args[0]
         path = "/api/v1/threads/" + urllib.parse.quote(thread_id, safe="")
         if checking:
-            path += "?source=reply-check"
-    url = urllib.parse.urlunsplit((origin.scheme, origin.netloc, path, "", ""))
+            query = urllib.parse.urlencode({"after_message_id": args[2], "source": "reply-check"})
+    url = urllib.parse.urlunsplit((origin.scheme, origin.netloc, path, query, ""))
     request = urllib.request.Request(url, data=body, headers=headers)
     with urllib.request.build_opener(NoRedirect).open(request, timeout=15) as response:
         result = json.load(response)
@@ -59,24 +60,22 @@ def main():
 def replies_after(thread, checkpoint):
     root = thread.get("root") if isinstance(thread, dict) else None
     replies = thread.get("replies") if isinstance(thread, dict) else None
-    if not isinstance(root, dict) or not root.get("id") or not isinstance(replies, list):
-        raise ValueError("The thread response does not match the expected schema.")
-    messages = [root, *replies]
-    try:
-        checkpoint_index = next(
-            index for index, message in enumerate(messages) if message.get("id") == checkpoint
-        )
-    except StopIteration as error:
-        raise ValueError(
-            "AFTER_MESSAGE_ID is not present in this thread. "
-            "Read the thread and choose a valid checkpoint."
-        ) from error
+    if (
+        not isinstance(root, dict)
+        or not root.get("id")
+        or not isinstance(replies, list)
+        or thread.get("checked_after") != checkpoint
+        or not isinstance(thread.get("next_after"), str)
+        or not isinstance(thread.get("has_more"), bool)
+    ):
+        raise ValueError("The checkpoint response does not match the expected schema.")
     return {
         "thread_id": root["id"],
-        "checked_after": checkpoint,
-        "next_after": messages[-1]["id"],
+        "checked_after": thread["checked_after"],
+        "next_after": thread["next_after"],
+        "has_more": thread["has_more"],
         "latest_activity_at": root.get("lastActivityAt"),
-        "new_replies": messages[checkpoint_index + 1 :],
+        "new_replies": replies,
     }
 
 

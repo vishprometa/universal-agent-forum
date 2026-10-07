@@ -113,6 +113,12 @@ await test('example clients only write explicitly and refuse credential-forwardi
                 id: 'thread-root',
                 lastActivityAt: '2026-09-23T10:00:00.000Z',
               },
+              checked_after: new URL(
+                req.url,
+                'http://localhost',
+              ).searchParams.get('after_message_id'),
+              next_after: 'reply-one',
+              has_more: false,
               replies: [
                 {
                   id: 'reply-one',
@@ -151,6 +157,7 @@ await test('example clients only write explicitly and refuse credential-forwardi
       thread_id: 'thread-root',
       checked_after: 'thread-root',
       next_after: 'reply-one',
+      has_more: false,
       latest_activity_at: '2026-09-23T10:00:00.000Z',
       new_replies: [
         {
@@ -175,4 +182,113 @@ await test('example clients only write explicitly and refuse credential-forwardi
     requests.every((request) => request.method === 'GET' && !request.key),
   );
   assert.ok(requests.every((request) => request.path !== '/must-not-follow'));
+});
+
+await test('checkpoint clients page after an unseen cursor without forwarding credentials', async (t) => {
+  const requests = [];
+  const server = createServer((req, res) => {
+    const url = new URL(req.url, 'http://localhost');
+    const checkpoint = url.searchParams.get('after_message_id');
+    requests.push({
+      method: req.method,
+      checkpoint,
+      source: url.searchParams.get('source'),
+      bearer: req.headers.authorization,
+    });
+    res.setHeader('Content-Type', 'application/json');
+    if (checkpoint === 'foreign &checkpoint') {
+      res.writeHead(400);
+      res.end(JSON.stringify({ error: { code: 'invalid_checkpoint' } }));
+      return;
+    }
+    if (checkpoint === 'legacy-response') {
+      res.end(JSON.stringify({ root: { id: 'thread-root' }, replies: [] }));
+      return;
+    }
+    const next = checkpoint === 'saved-after-500' ? 'reply-501' : 'reply-502';
+    res.end(
+      JSON.stringify({
+        root: { id: 'thread-root', lastActivityAt: '2026-10-07T00:00:00.000Z' },
+        checked_after: checkpoint,
+        next_after: checkpoint === 'reply-502' ? checkpoint : next,
+        has_more: checkpoint === 'saved-after-500',
+        replies:
+          checkpoint === 'reply-502'
+            ? []
+            : [{ id: next, parentId: 'thread-root' }],
+      }),
+    );
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  t.after(() => server.close());
+  const privateFixtureKey = 'private_fixture_key_not_for_a_real_service';
+  const env = {
+    ...process.env,
+    UAF_ORIGIN: `http://127.0.0.1:${server.address().port}`,
+    UAF_API_KEY: privateFixtureKey,
+  };
+  for (const [runtime, file] of [
+    [process.execPath, '../public/examples/forum.mjs'],
+    ['python3', '../public/examples/forum.py'],
+    [
+      process.execPath,
+      '../plugins/universal-agent-forum/skills/uaf/scripts/forum.mjs',
+    ],
+  ]) {
+    const client = new URL(file, import.meta.url).pathname;
+    let checkpoint = 'saved-after-500';
+    for (const [id, more] of [
+      ['reply-501', true],
+      ['reply-502', false],
+      ['reply-502', false],
+    ]) {
+      const before = requests.length;
+      const response = await exec(
+        runtime,
+        [client, '--check', 'thread-root', checkpoint],
+        { env },
+      );
+      const result = JSON.parse(response.stdout);
+      assert.equal(result.checked_after, checkpoint);
+      assert.equal(result.next_after, id);
+      assert.equal(result.has_more, more);
+      assert.deepEqual(
+        result.new_replies,
+        checkpoint === 'reply-502' ? [] : [{ id, parentId: 'thread-root' }],
+      );
+      assert.equal(requests.length, before + 1);
+      assert.ok(!response.stdout.includes(privateFixtureKey));
+      checkpoint = result.next_after;
+    }
+    await assert.rejects(
+      exec(runtime, [client, '--check', 'thread-root', 'foreign &checkpoint'], {
+        env,
+      }),
+      (error) => {
+        assert.match(error.stderr, /HTTP 400/);
+        assert.ok(!error.stderr.includes(privateFixtureKey));
+        return true;
+      },
+    );
+    await assert.rejects(
+      exec(runtime, [client, '--check', 'thread-root', 'legacy-response'], {
+        env,
+      }),
+      (error) => {
+        assert.match(error.stderr, /checkpoint response does not match/);
+        return true;
+      },
+    );
+  }
+  assert.equal(requests.length, 15);
+  assert.ok(
+    requests.every(
+      (r) => r.method === 'GET' && !r.bearer && r.source === 'reply-check',
+    ),
+  );
+  assert.equal(
+    requests.filter((r) => r.checkpoint === 'foreign &checkpoint').length,
+    3,
+  );
 });

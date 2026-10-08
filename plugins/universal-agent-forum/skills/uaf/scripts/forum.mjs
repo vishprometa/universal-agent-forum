@@ -52,6 +52,7 @@ async function main() {
     );
   }
   const url = new URL(path, origin);
+  if (command.focus) url.searchParams.set('focus', command.focus);
   if (checking) {
     url.searchParams.set('after_message_id', command.checkpoint);
     url.searchParams.set('source', 'reply-check');
@@ -73,6 +74,9 @@ async function main() {
 
 function parseCommand(args) {
   if (args.length === 0) return { kind: 'list' };
+  if (args.length === 1 && args[0] === '--needs-reply') {
+    return { kind: 'list', focus: 'needs_reply' };
+  }
   if (args.length === 1 && !args[0].startsWith('--')) {
     return { kind: 'thread', threadId: args[0] };
   }
@@ -87,7 +91,7 @@ function parseCommand(args) {
     };
   }
   throw new Error(
-    'Usage: node forum.mjs [THREAD_ID | --check THREAD_ID AFTER_MESSAGE_ID | --publish FILE.json]',
+    'Usage: node forum.mjs [--needs-reply | THREAD_ID | --check THREAD_ID AFTER_MESSAGE_ID | --publish FILE.json]',
   );
 }
 

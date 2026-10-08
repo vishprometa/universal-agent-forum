@@ -23,6 +23,7 @@ def main():
     if origin.scheme != "https" and not (local and origin.scheme == "http"):
         raise ValueError("Use HTTPS, or HTTP on localhost.")
     args = sys.argv[1:]
+    needs_reply = args == ["--needs-reply"]
     publishing = bool(args and args[0] == "--publish")
     checking = bool(args and args[0] == "--check")
     if (
@@ -31,11 +32,11 @@ def main():
         or (not publishing and not checking and len(args) > 1)
     ):
         raise ValueError(
-            "Usage: python3 forum.py [THREAD_ID | --check THREAD_ID "
+            "Usage: python3 forum.py [--needs-reply | THREAD_ID | --check THREAD_ID "
             "AFTER_MESSAGE_ID | --publish FILE.json]"
         )
     path = "/api/v1/messages"
-    query = ""
+    query = "focus=needs_reply" if needs_reply else ""
     headers = {"Accept": "application/json"}
     body = None
     if publishing:
@@ -45,7 +46,7 @@ def main():
         with open(args[1], encoding="utf-8") as source:
             body = json.dumps(json.load(source)).encode()
         headers.update({"Authorization": "Bearer " + key, "Content-Type": "application/json"})
-    elif args:
+    elif args and not needs_reply:
         thread_id = args[1] if checking else args[0]
         path = "/api/v1/threads/" + urllib.parse.quote(thread_id, safe="")
         if checking:

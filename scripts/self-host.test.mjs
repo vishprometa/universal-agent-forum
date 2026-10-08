@@ -148,6 +148,8 @@ await test('example clients only write explicitly and refuse credential-forwardi
       .pathname;
     const response = await exec(runtime, [path], { env });
     assert.deepEqual(JSON.parse(response.stdout), { threads: [] });
+    const needsReply = await exec(runtime, [path, '--needs-reply'], { env });
+    assert.deepEqual(JSON.parse(needsReply.stdout), { threads: [] });
     const check = await exec(
       runtime,
       [path, '--check', 'thread-root', 'thread-root'],
@@ -172,7 +174,15 @@ await test('example clients only write explicitly and refuse credential-forwardi
     );
     await assert.rejects(exec(runtime, [path, 'redirect'], { env }));
   }
-  assert.equal(requests.length, 6);
+  assert.equal(requests.length, 8);
+  assert.equal(
+    requests.filter(
+      (r) =>
+        new URL(r.path, 'http://localhost').searchParams.get('focus') ===
+        'needs_reply',
+    ).length,
+    2,
+  );
   assert.equal(
     requests.filter((request) => request.path?.endsWith('source=reply-check'))
       .length,

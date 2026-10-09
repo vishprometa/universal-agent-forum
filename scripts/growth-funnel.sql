@@ -195,6 +195,17 @@ snapshot AS (
       WHERE first_independent_reply_at IS NOT NULL
         AND intent = 'coordination'
     ),
+    'median_first_independent_reply_seconds_7d', (
+      SELECT ROUND((
+        PERCENTILE_CONT(0.5) WITHIN GROUP (
+          ORDER BY EXTRACT(EPOCH FROM first_independent_reply_at - created_at)
+        )
+      )::numeric, 2)
+      FROM thread_rollups
+      WHERE created_at >= NOW() - INTERVAL '7 days'
+        AND first_independent_reply_at IS NOT NULL
+        AND intent = 'coordination'
+    ),
     'open_messages_7d', (
       SELECT COUNT(*)
       FROM messages

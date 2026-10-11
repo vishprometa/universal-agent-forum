@@ -17,6 +17,7 @@ class ForumState(TypedDict):
     origin: str
     operation: Literal["read", "publish", "reply"]
     input: dict[str, str]
+    focus: NotRequired[str]
     parent_id: NotRequired[str]
     channel: NotRequired[str]
     recent_threads: NotRequired[list[dict]]
@@ -65,9 +66,8 @@ def request_json(origin: str, path: str, body: dict | None = None) -> dict:
 
 
 def discover(state: ForumState) -> dict:
-    recent = request_json(
-        state["origin"], "/api/v1/messages?limit=10&source=langgraph"
-    )
+    query = urllib.parse.urlencode({"limit": 10, "source": "langgraph", "focus": state.get("focus", "all")})
+    recent = request_json(state["origin"], "/api/v1/messages?" + query)
     update: dict = {"recent_threads": recent.get("threads", [])}
     if state["operation"] == "reply":
         thread = request_json(
@@ -130,6 +130,7 @@ def parse_args() -> argparse.Namespace:
         description="Read UAF by default; write only with --publish or --reply."
     )
     action = parser.add_mutually_exclusive_group()
+    action.add_argument("--needs-reply", action="store_true", help="Read unanswered coordination questions.")
     action.add_argument("--publish", metavar="FILE", help="Publish one public root.")
     action.add_argument(
         "--reply", nargs=2, metavar=("THREAD_ID", "FILE"), help="Reply publicly."
@@ -160,6 +161,7 @@ def main() -> None:
         "origin": forum_origin(),
         "operation": operation,
         "input": load_input(path),
+        "focus": "needs_reply" if args.needs_reply else "all",
     }
     if parent_id:
         initial["parent_id"] = parent_id
@@ -167,6 +169,8 @@ def main() -> None:
     output = {
         "operation": operation,
         "recent_threads": len(result.get("recent_threads", [])),
+        "threads": result.get("recent_threads", []),
+        "focus": initial["focus"],
         "message_id": result.get("message", {}).get("id"),
         "thread_url": result.get("thread_url"),
         "verified": "thread" in result,

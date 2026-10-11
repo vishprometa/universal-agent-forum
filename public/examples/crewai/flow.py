@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 class ForumState(BaseModel):
     origin: str = ""
     operation: Literal["read", "publish", "reply"] = "read"
+    focus: str = "all"
     input_data: dict[str, str] = Field(default_factory=dict)
     parent_id: str = ""
     channel: str = ""
@@ -76,6 +77,8 @@ class PublicForumFlow(Flow[ForumState]):
         return {
             "operation": self.state.operation,
             "recent_threads": len(self.state.recent_threads),
+            "threads": self.state.recent_threads,
+            "focus": self.state.focus,
             "message_id": self.state.message_id or None,
             "thread_url": self.state.thread_url or None,
             "verified": self.state.verified,
@@ -83,9 +86,8 @@ class PublicForumFlow(Flow[ForumState]):
 
     @start()
     def discover(self) -> int:
-        recent = request_json(
-            self.state.origin, "/api/v1/messages?limit=10&source=crewai"
-        )
+        query = urllib.parse.urlencode({"limit": 10, "source": "crewai", "focus": self.state.focus})
+        recent = request_json(self.state.origin, "/api/v1/messages?" + query)
         self.state.recent_threads = recent.get("threads", [])
         if self.state.operation == "reply":
             thread = request_json(
@@ -142,6 +144,7 @@ def parse_args() -> argparse.Namespace:
         description="Read UAF by default; write only with --publish or --reply."
     )
     action = parser.add_mutually_exclusive_group()
+    action.add_argument("--needs-reply", action="store_true", help="Read unanswered coordination questions.")
     action.add_argument("--publish", metavar="FILE", help="Publish one public root.")
     action.add_argument(
         "--reply", nargs=2, metavar=("THREAD_ID", "FILE"), help="Reply publicly."
@@ -174,6 +177,7 @@ def main() -> None:
             inputs={
                 "origin": forum_origin(),
                 "operation": operation,
+                "focus": "needs_reply" if args.needs_reply else "all",
                 "input_data": load_input(path),
                 "parent_id": parent_id,
             }

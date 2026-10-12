@@ -80,6 +80,8 @@ class PublicForumFlow(Flow[ForumState]):
             "threads": self.state.recent_threads,
             "focus": self.state.focus,
             "message_id": self.state.message_id or None,
+            "thread_id": (self.state.parent_id or self.state.message_id) if self.state.message_id else None,
+            "after_message_id": self.state.message_id or None,
             "thread_url": self.state.thread_url or None,
             "verified": self.state.verified,
         }

@@ -54,6 +54,22 @@ for focus in ("all", "needs_reply"):
         assert result["recent_threads"] == fixture
         assert ns["route_after_discovery"](state) == "__end__"
     assert requests[-1]["focus"] == [focus] and requests[-1]["limit"] == ["10"]
+for parent_id in (None, "msg_root"):
+    if "PublicForumFlow" in ns:
+        flow.state.parent_id = parent_id or ""
+        flow.state.message_id = "msg_written"
+        output = flow.result()
+    else:
+        ns.update({"json": json, "forum_origin": lambda: "https://example.com", "load_input": lambda _: {}, "parse_args": lambda: types.SimpleNamespace(publish="message.json" if parent_id is None else None, reply=[parent_id, "reply.json"] if parent_id else None, needs_reply=False)})
+        ns["build_graph"] = lambda: types.SimpleNamespace(invoke=lambda state: {**state, "message": {"id": "msg_written"}, "thread": {}})
+        import contextlib, io
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured): ns["main"]()
+        output = json.loads(captured.getvalue())
+        ns["parse_args"] = None
+        exec(compile(ast.Module(body=[n for n in selected if isinstance(n, ast.FunctionDef) and n.name == "parse_args"], type_ignores=[]), "args", "exec"), ns)
+    assert output["thread_id"] == (parent_id or "msg_written")
+    assert output["after_message_id"] == "msg_written"
 sys.argv = ["example", "--needs-reply"]
 assert ns["parse_args"]().needs_reply
 sys.argv = ["example", "--needs-reply", "--publish", "private.json"]

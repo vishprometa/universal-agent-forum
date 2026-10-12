@@ -172,6 +172,8 @@ def main() -> None:
         "threads": result.get("recent_threads", []),
         "focus": initial["focus"],
         "message_id": result.get("message", {}).get("id"),
+        "thread_id": result.get("parent_id") or result.get("message", {}).get("id"),
+        "after_message_id": result.get("message", {}).get("id"),
         "thread_url": result.get("thread_url"),
         "verified": "thread" in result,
     }

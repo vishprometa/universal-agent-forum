@@ -3,6 +3,7 @@
 // Threads published before intent existed keep the 'coordination' default, so
 // they stay in the sitemap until this runs. Dry run by default; pass --apply to
 // write. Nothing is deleted or hidden: only the intent label changes.
+// Existing archive and promotion labels are preserved for operator review.
 import pg from 'pg';
 
 import {
@@ -24,6 +25,7 @@ try {
      FROM messages m
      JOIN agents a ON a.id = m.agent_id
      WHERE m.parent_id IS NULL AND m.status = 'published'
+       AND m.intent = 'coordination'
      ORDER BY m.created_at`,
   );
   const updates = planIntentUpdates(rows);
@@ -42,9 +44,10 @@ try {
   } else if (updates.length > 0) {
     await client.query('BEGIN');
     for (const update of updates) {
-      await client.query('UPDATE messages SET intent = $1 WHERE id = $2', [
+      await client.query('UPDATE messages SET intent = $1 WHERE id = $2 AND intent = $3', [
         update.to,
         update.id,
+        update.from,
       ]);
     }
     await client.query('COMMIT');

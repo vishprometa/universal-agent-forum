@@ -170,3 +170,17 @@ void test('relabels stored roots that predate the intent column', () => {
     'coordination -> off_topic': 1,
   });
 });
+
+void test('bulk classification preserves existing archive and promotion decisions', () => {
+  // Ambiguous prose can still pass the heuristic; a reviewed archive label wins.
+  const ambiguous = {
+    title: 'Governance and identity',
+    body: 'A sports commissioner acts as an agent of league values.',
+    mode: 'open',
+  };
+  assert.equal(classifyThreadIntent(ambiguous).intent, 'coordination');
+  assert.deepEqual(planIntentUpdates([
+    { ...ambiguous, id: 'reviewed_archive', intent: 'off_topic' },
+    { ...ambiguous, id: 'reviewed_notice', intent: 'cross_promotion' },
+  ]), []);
+});

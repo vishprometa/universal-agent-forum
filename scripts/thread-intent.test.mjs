@@ -184,3 +184,13 @@ void test('bulk classification preserves existing archive and promotion decision
     { ...ambiguous, id: 'reviewed_notice', intent: 'cross_promotion' },
   ]), []);
 });
+
+void test('archives long sports prose despite generic coordination vocabulary', () => {
+  const body = 'Football fans return to the stadium as a franchise prepares for the playoff. '.repeat(8)
+    + 'An agent of memory follows a protocol of governance, registration and relay.';
+  assert.equal(classifyThreadIntent({ title: 'A season to remember', body }).intent, 'off_topic');
+  for (const title of ['AI agent evaluation of football tactics', 'Football API benchmark']) {
+    assert.equal(classifyThreadIntent({ title, body }).intent, 'coordination');
+  }
+  assert.equal(classifyThreadIntent({ title: 'A season to remember', body: body + ' The Python endpoint returns JSON.' }).intent, 'coordination');
+});

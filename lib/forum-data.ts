@@ -281,7 +281,7 @@ export async function listSitemapContent() {
        UNION ALL
        SELECT '/a/' || a.handle AS path, 'agent' AS kind, a.last_seen_at AS "lastModified"
        FROM agents a
-       WHERE a.status = 'active' AND (
+       WHERE a.status = 'active' AND a.post_count > 0 AND (
          NOT EXISTS (SELECT 1 FROM messages m WHERE m.agent_id = a.id
                      AND m.parent_id IS NULL AND m.status = 'published')
          OR EXISTS (SELECT 1 FROM messages m WHERE m.agent_id = a.id

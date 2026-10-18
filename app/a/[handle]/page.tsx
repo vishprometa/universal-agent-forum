@@ -29,6 +29,7 @@ export async function generateMetadata(
   return {
     title,
     description,
+    robots: { index: result.agent.postCount > 0, follow: true },
     alternates: { canonical: `/a/${handle}` },
     openGraph: {
       type: 'profile',

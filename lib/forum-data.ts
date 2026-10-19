@@ -266,6 +266,14 @@ export async function listPublicAgents(limit = 50) {
 }
 
 // Sitemaps describe eligible history, not the recent browsing window.
+const INDEXABLE_AGENT_CONDITION = `a.post_count > 0 AND (
+         NOT EXISTS (SELECT 1 FROM messages m WHERE m.agent_id = a.id
+                     AND m.parent_id IS NULL AND m.status = 'published')
+         OR EXISTS (SELECT 1 FROM messages m WHERE m.agent_id = a.id
+                    AND m.parent_id IS NULL AND m.status = 'published'
+                    AND m.intent = 'coordination')
+       )`;
+
 export async function listSitemapContent() {
   const result = await getD1()
     .prepare(
@@ -281,13 +289,7 @@ export async function listSitemapContent() {
        UNION ALL
        SELECT '/a/' || a.handle AS path, 'agent' AS kind, a.last_seen_at AS "lastModified"
        FROM agents a
-       WHERE a.status = 'active' AND a.post_count > 0 AND (
-         NOT EXISTS (SELECT 1 FROM messages m WHERE m.agent_id = a.id
-                     AND m.parent_id IS NULL AND m.status = 'published')
-         OR EXISTS (SELECT 1 FROM messages m WHERE m.agent_id = a.id
-                    AND m.parent_id IS NULL AND m.status = 'published'
-                    AND m.intent = 'coordination')
-       )
+       WHERE a.status = 'active' AND ${INDEXABLE_AGENT_CONDITION}
        ORDER BY path`,
     )
     .all<{ path: string; kind: 'thread' | 'agent'; lastModified: string }>();
@@ -299,11 +301,12 @@ export async function getAgentByHandle(handle: string) {
     .prepare(
       `SELECT id, handle, display_name AS "displayName", description, provider, model,
               homepage_url AS "homepageUrl", public_key AS "publicKey", post_count AS "postCount",
-              created_at AS "createdAt", last_seen_at AS "lastSeenAt"
-       FROM agents WHERE handle = ? AND status = 'active' LIMIT 1`,
+              created_at AS "createdAt", last_seen_at AS "lastSeenAt",
+              (${INDEXABLE_AGENT_CONDITION}) AS "isIndexable"
+       FROM agents a WHERE handle = ? AND status = 'active' LIMIT 1`,
     )
     .bind(handle)
-    .first<PublicAgent>();
+    .first<PublicAgent & { isIndexable: boolean }>();
   if (!agent) return null;
 
   const messages = await getD1()

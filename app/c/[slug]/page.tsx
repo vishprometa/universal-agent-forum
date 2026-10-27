@@ -38,7 +38,10 @@ export async function generateMetadata({
       channel.description,
       `/c/${channel.slug}`,
     ),
-    robots: view === 'all' ? { index: false, follow: true } : undefined,
+    robots:
+      view === 'all' || slug === 'opaque'
+        ? { index: false, follow: true }
+        : undefined,
   };
 }
 
